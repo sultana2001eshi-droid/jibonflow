@@ -1,4 +1,5 @@
 import { ExternalLink, MapPin, BookOpen, Lightbulb } from "lucide-react";
+import profileImg from "@/assets/md-nasrullah-profile.jpg";
 
 const About = () => (
   <div className="min-h-screen pt-24 pb-16">
@@ -6,11 +7,18 @@ const About = () => (
       {/* Profile Card */}
       <div className="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden animate-fade-in">
         <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl" />
         
         <div className="relative z-10 space-y-6">
-          {/* Avatar placeholder */}
-          <div className="w-28 h-28 mx-auto rounded-full bg-gradient-to-br from-accent/30 to-secondary/30 border-4 border-accent/20 gold-glow flex items-center justify-center">
-            <span className="font-display text-3xl font-bold text-foreground">MN</span>
+          {/* Profile image */}
+          <div className="flex justify-center">
+            <div className="profile-frame rounded-full p-[3px]">
+              <img
+                src={profileImg}
+                alt="MD. NASRULLAH"
+                className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover relative z-10 border-4 border-background"
+              />
+            </div>
           </div>
 
           <div className="text-center space-y-2">
@@ -31,7 +39,7 @@ const About = () => (
             <div className="flex items-start gap-3 text-left glass-card rounded-xl p-4">
               <Lightbulb size={18} className="text-accent shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground font-bangla leading-relaxed">
-                ডিজাইন, টেকনোলজি ও ডিজিটাল প্রোডাক্ট নির্মাণে আগ্রহী একজন সৃজনশীল উদ্ভাবক। মানুষের দৈনন্দিন জীবন সহজ করার লক্ষ্যে কাজ করে যাচ্ছেন।
+                ডিজাইন ও ডিজিটাল প্রোডাক্ট নির্মাণে আগ্রহী। মানুষের দৈনন্দিন সমস্যার স্মার্ট সমাধান তৈরিতে কাজ করছেন।
               </p>
             </div>
           </div>
