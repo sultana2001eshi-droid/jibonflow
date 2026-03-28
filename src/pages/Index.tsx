@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
-  PenTool, Target, Clock, ArrowRight, Sparkles, Star, Zap,
+  PenTool, Target, Clock, ArrowRight, Sparkles,
   TrendingUp, ChefHat
 } from "lucide-react";
 
@@ -12,7 +13,7 @@ const tools = [
   { icon: FileText, title: "দরখাস্ত বিল্ডার", desc: "স্মার্ট বাংলা আবেদন তৈরি", path: "/tools/application", gradient: "from-blue-400 to-indigo-500" },
   { icon: Package, title: "ব্যবসা পাওয়ার টুলস", desc: "প্রফিট, ক্যাশ মেমো, অর্ডার সামারি", path: "/tools/business", gradient: "from-purple-400 to-pink-500" },
   { icon: Brain, title: "লাইফ অর্গানাইজার PRO", desc: "রুটিন ও ফোকাস প্ল্যানার", path: "/tools/organizer", gradient: "from-cyan-400 to-blue-500" },
-  { icon: PenTool, title: "ক্যাপশন ল্যাব", desc: "ফেসবুক ক্যাপশন ও বায়ো", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
+  { icon: PenTool, title: "ক্যাপশন ল্যাব", desc: "স্মার্ট ক্যাপশন ও বায়ো", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "সেরা সিদ্ধান্ত নেয়ার সহায়তা", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
   { icon: Clock, title: "টাইম সিস্টেম", desc: "সঠিক বয়স ও সময়ের হিসাব", path: "/tools/age", gradient: "from-violet-400 to-purple-500" },
 ];
@@ -24,6 +25,16 @@ const Particles = () => (
     ))}
   </div>
 );
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 const Index = () => {
   return (
@@ -40,29 +51,31 @@ const Index = () => {
         <Particles />
 
         <div className="container relative z-10 pt-24 pb-16">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card text-xs font-heading text-muted-foreground animate-fade-in border-accent/20">
+          <motion.div 
+            className="max-w-4xl mx-auto text-center space-y-8"
+            initial="hidden"
+            animate="show"
+            variants={stagger}
+          >
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card text-xs font-heading text-muted-foreground border-accent/20">
               <Sparkles size={14} className="text-accent" />
               <span className="font-bangla">বাংলায় তৈরি, বাংলার জন্য</span>
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            </div>
+            </motion.div>
             
-            {/* Main headline */}
-            <h1 className="font-bangla-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.2] text-foreground animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              আপনার প্রতিদিনের সমস্যার{" "}
-              <span className="gradient-text">স্মার্ট সমাধান</span>
-            </h1>
+            <motion.h1 variants={fadeUp} className="font-bangla-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.2] text-foreground">
+              দৈনন্দিন সমস্যার জন্য{" "}
+              <span className="gradient-text">স্মার্ট ডিজিটাল সমাধান</span>
+            </motion.h1>
             
-            <p className="text-lg sm:text-xl text-muted-foreground font-bangla-serif max-w-xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: "0.2s" }}>
-              শুধু টুল না — বাস্তব জীবনের কাজে লাগে এমন সিস্টেম
-            </p>
+            <motion.p variants={fadeUp} className="text-lg sm:text-xl text-muted-foreground font-bangla-serif max-w-xl mx-auto leading-relaxed">
+              শুধু টুল নয় — আপনার বাস্তব জীবনের সহকারী
+            </motion.p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/tools">
                 <Button variant="hero" size="xl" className="animate-glow-pulse">
-                  এখনই ব্যবহার করুন
+                  টুল ব্যবহার করুন
                   <ArrowRight size={18} />
                 </Button>
               </Link>
@@ -71,11 +84,10 @@ const Index = () => {
                   ডেমো দেখুন
                 </Button>
               </a>
-            </div>
+            </motion.div>
 
             {/* Interactive demo preview cards */}
-            <div id="demo" className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.5s" }}>
-              {/* Budget demo card */}
+            <motion.div variants={fadeUp} id="demo" className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <Link to="/tools/budget" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
@@ -105,7 +117,6 @@ const Index = () => {
                 </div>
               </Link>
 
-              {/* Meal demo card */}
               <Link to="/tools/meal" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
@@ -132,8 +143,8 @@ const Index = () => {
                   ব্যবহার করুন <ArrowRight size={12} />
                 </div>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -141,7 +152,13 @@ const Index = () => {
       <section className="py-24 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--accent)/0.03),transparent_70%)]" />
         <div className="container relative">
-          <div className="text-center mb-16 space-y-4">
+          <motion.div 
+            className="text-center mb-16 space-y-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <span className="text-xs font-heading text-accent tracking-[0.3em] uppercase">Tools Ecosystem</span>
             <h2 className="font-bangla-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
               আমাদের <span className="text-accent">টুলস</span>
@@ -149,27 +166,33 @@ const Index = () => {
             <p className="text-muted-foreground font-bangla max-w-md mx-auto">
               দৈনন্দিন জীবনের প্রতিটি কাজ সহজ করতে তৈরি
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {tools.map((tool, i) => (
-              <Link
-                key={tool.path}
-                to={tool.path}
-                className="glass-card-hover gradient-border rounded-2xl p-6 group animate-fade-in"
-                style={{ animationDelay: `${i * 0.06}s` }}
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
-                  <tool.icon size={22} className="text-white" />
-                </div>
-                <h3 className="font-heading font-semibold text-foreground mb-1.5 flex items-center gap-2">
-                  {tool.title}
-                  <ArrowRight size={14} className="text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all opacity-0 group-hover:opacity-100" />
-                </h3>
-                <p className="text-sm text-muted-foreground font-bangla">{tool.desc}</p>
-              </Link>
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
+            {tools.map((tool) => (
+              <motion.div key={tool.path} variants={fadeUp}>
+                <Link
+                  to={tool.path}
+                  className="glass-card-hover gradient-border rounded-2xl p-6 group block"
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
+                    <tool.icon size={22} className="text-white" />
+                  </div>
+                  <h3 className="font-heading font-semibold text-foreground mb-1.5 flex items-center gap-2">
+                    {tool.title}
+                    <ArrowRight size={14} className="text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all opacity-0 group-hover:opacity-100" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-bangla">{tool.desc}</p>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -194,7 +217,13 @@ const Index = () => {
       {/* CTA */}
       <section className="py-24">
         <div className="container">
-          <div className="glass-card rounded-3xl p-10 sm:p-16 text-center relative overflow-hidden">
+          <motion.div 
+            className="glass-card rounded-3xl p-10 sm:p-16 text-center relative overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 animate-gradient" />
             <div className="absolute top-0 right-0 w-60 h-60 bg-accent/10 rounded-full blur-[80px]" />
             <div className="absolute bottom-0 left-0 w-60 h-60 bg-secondary/10 rounded-full blur-[80px]" />
@@ -211,7 +240,7 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>
