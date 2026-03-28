@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
-  PenTool, Target, Clock, ArrowRight, Sparkles, Star, Zap
+  PenTool, Target, Clock, ArrowRight, Sparkles, Star, Zap,
+  TrendingUp, ChefHat
 } from "lucide-react";
 
 const tools = [
@@ -19,14 +20,7 @@ const tools = [
 const Particles = () => (
   <div className="particles">
     {Array.from({ length: 8 }).map((_, i) => (
-      <div
-        key={i}
-        className="particle"
-        style={{
-          left: `${10 + i * 12}%`,
-          animationDelay: `${i * -1.2}s`,
-        }}
-      />
+      <div key={i} className="particle" style={{ left: `${10 + i * 12}%`, animationDelay: `${i * -1.2}s` }} />
     ))}
   </div>
 );
@@ -36,32 +30,17 @@ const Index = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative min-h-[92vh] flex items-center overflow-hidden">
-        {/* Layered gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5 animate-gradient" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--accent)/0.08),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(var(--gradient-indigo)/0.08),transparent_50%)]" />
         
-        {/* Glow orbs */}
         <div className="absolute top-20 right-10 w-80 h-80 bg-accent/10 rounded-full blur-[100px] animate-pulse-glow" />
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px]" />
         
-        {/* Floating particles */}
         <Particles />
 
-        {/* Floating icons */}
-        <div className="absolute top-1/4 right-[15%] animate-float opacity-20">
-          <Sparkles size={44} className="text-accent" />
-        </div>
-        <div className="absolute bottom-1/3 left-[10%] animate-float-slow opacity-15">
-          <Star size={36} className="text-secondary" />
-        </div>
-        <div className="absolute top-[60%] right-[8%] animate-float opacity-10" style={{ animationDelay: "2s" }}>
-          <Zap size={32} className="text-accent" />
-        </div>
-
         <div className="container relative z-10 pt-24 pb-16">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card text-xs font-heading text-muted-foreground animate-fade-in border-accent/20">
               <Sparkles size={14} className="text-accent" />
@@ -70,47 +49,89 @@ const Index = () => {
             </div>
             
             {/* Main headline */}
-            <h1 className="font-bangla-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.2] text-foreground animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              আপনার প্রতিদিনের জীবনকে{" "}
-              <span className="gradient-text">দিন নতুন রূপ</span>
+            <h1 className="font-bangla-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.2] text-foreground animate-fade-in" style={{ animationDelay: "0.1s" }}>
+              আপনার প্রতিদিনের সমস্যার{" "}
+              <span className="gradient-text">স্মার্ট সমাধান</span>
             </h1>
             
-            {/* Subheadline */}
             <p className="text-lg sm:text-xl text-muted-foreground font-bangla-serif max-w-xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: "0.2s" }}>
-              হিসাব, রান্না, পরিকল্পনা, ব্যবসা — সব এক প্ল্যাটফর্মে
+              শুধু টুল না — বাস্তব জীবনের কাজে লাগে এমন সিস্টেম
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Link to="/tools">
                 <Button variant="hero" size="xl" className="animate-glow-pulse">
-                  এখনই শুরু করুন
+                  এখনই ব্যবহার করুন
                   <ArrowRight size={18} />
                 </Button>
               </Link>
-              <Link to="/tools">
+              <a href="#demo">
                 <Button variant="hero-outline" size="xl">
-                  টুলস দেখুন
+                  ডেমো দেখুন
                 </Button>
-              </Link>
+              </a>
             </div>
 
-            {/* Glass preview card */}
-            <div className="mt-12 animate-fade-in" style={{ animationDelay: "0.5s" }}>
-              <div className="glass-card rounded-3xl p-6 sm:p-8 max-w-md mx-auto border-accent/10 premium-shadow">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                  <div className="w-3 h-3 rounded-full bg-accent/60" />
-                  <div className="w-3 h-3 rounded-full bg-secondary/60" />
+            {/* Interactive demo preview cards */}
+            <div id="demo" className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: "0.5s" }}>
+              {/* Budget demo card */}
+              <Link to="/tools/budget" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                    <TrendingUp size={16} className="text-white" />
+                  </div>
+                  <span className="text-sm font-heading font-semibold text-foreground">বাজেট রিপোর্ট</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="h-3 bg-muted rounded-full w-3/4" />
-                  <div className="h-3 bg-muted rounded-full w-1/2" />
-                  <div className="h-8 bg-accent/10 rounded-xl w-full mt-4 flex items-center justify-center">
-                    <span className="text-xs font-bangla text-accent">৮টি স্মার্ট টুলস</span>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between text-xs font-bangla">
+                    <span className="text-muted-foreground">আয়</span>
+                    <span className="text-foreground font-medium">৳২৫,০০০</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-bangla">
+                    <span className="text-muted-foreground">খরচ</span>
+                    <span className="text-foreground font-medium">৳১৮,০০০</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full" style={{ width: "72%" }} />
+                  </div>
+                  <div className="flex justify-between text-xs font-bangla">
+                    <span className="text-accent font-medium">সেভিংস: ৳৭,০০০</span>
+                    <span className="text-muted-foreground">২৮%</span>
                   </div>
                 </div>
-              </div>
+                <div className="mt-3 text-xs text-accent font-heading flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  ব্যবহার করুন <ArrowRight size={12} />
+                </div>
+              </Link>
+
+              {/* Meal demo card */}
+              <Link to="/tools/meal" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                    <ChefHat size={16} className="text-white" />
+                  </div>
+                  <span className="text-sm font-heading font-semibold text-foreground">আজকের মিল প্ল্যান</span>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { time: "সকাল", meal: "পরোটা, ডিমভুজি, চা" },
+                    { time: "দুপুর", meal: "ভাত, মুরগি, ডাল, সালাদ" },
+                    { time: "রাত", meal: "খিচুড়ি, বেগুনি" },
+                  ].map((m) => (
+                    <div key={m.time} className="flex items-start gap-2 text-xs font-bangla">
+                      <span className="text-accent font-medium min-w-[32px]">{m.time}</span>
+                      <span className="text-muted-foreground">{m.meal}</span>
+                    </div>
+                  ))}
+                  <div className="text-xs text-muted-foreground font-bangla pt-1 border-t border-border/30">
+                    আনুমানিক খরচ: <span className="text-accent font-medium">৳১২০</span>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-accent font-heading flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  ব্যবহার করুন <ArrowRight size={12} />
+                </div>
+              </Link>
             </div>
           </div>
         </div>

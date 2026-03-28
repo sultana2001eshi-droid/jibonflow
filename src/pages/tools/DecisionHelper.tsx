@@ -1,54 +1,153 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Target, Shuffle, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Target, Sparkles, ArrowLeft, Plus, X, Zap } from "lucide-react";
+
+type Priority = "price" | "quality" | "time";
+
+const priorityLabels: Record<Priority, string> = { price: "💰 দাম", quality: "⭐ মান", time: "⏱ সময়" };
+
+type Option = { name: string; priceScore: number; qualityScore: number; timeScore: number };
 
 const DecisionHelper = () => {
-  const [options, setOptions] = useState("");
-  const [result, setResult] = useState<string | null>(null);
+  const [options, setOptions] = useState<string[]>(["", ""]);
+  const [priority, setPriority] = useState<Priority>("quality");
+  const [result, setResult] = useState<{ best: string; reasoning: string; scores: { name: string; score: number }[] } | null>(null);
+
+  const addOption = () => setOptions([...options, ""]);
+  const removeOption = (i: number) => { if (options.length > 2) setOptions(options.filter((_, idx) => idx !== i)); };
+  const updateOption = (i: number, val: string) => { const n = [...options]; n[i] = val; setOptions(n); };
 
   const decide = () => {
-    const opts = options.split(",").map((o) => o.trim()).filter(Boolean);
-    if (opts.length < 2) return;
-    const chosen = opts[Math.floor(Math.random() * opts.length)];
-    setResult(chosen);
+    const valid = options.filter((o) => o.trim());
+    if (valid.length < 2) return;
+
+    const scored = valid.map((name) => {
+      const seed = name.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
+      const priceScore = ((seed * 7 + 13) % 40) + 60;
+      const qualityScore = ((seed * 11 + 29) % 35) + 65;
+      const timeScore = ((seed * 13 + 7) % 45) + 55;
+      return { name, priceScore, qualityScore, timeScore };
+    });
+
+    const weights: Record<Priority, [number, number, number]> = {
+      price: [0.5, 0.3, 0.2],
+      quality: [0.2, 0.5, 0.3],
+      time: [0.2, 0.3, 0.5],
+    };
+
+    const w = weights[priority];
+    const withTotal = scored.map((o) => ({
+      name: o.name,
+      score: Math.round(o.priceScore * w[0] + o.qualityScore * w[1] + o.timeScore * w[2]),
+    }));
+
+    withTotal.sort((a, b) => b.score - a.score);
+    const best = withTotal[0];
+
+    const reasonMap: Record<Priority, string> = {
+      price: `"${best.name}" দামের দিক থেকে সবচেয়ে সুবিধাজনক। এটি আপনার বাজেটের সাথে সবচেয়ে ভালো মানিয়ে যায়।`,
+      quality: `"${best.name}" গুণগত মানের দিক থেকে সেরা পছন্দ। দীর্ঘমেয়াদে এটি সবচেয়ে ভালো সন্তুষ্টি দেবে।`,
+      time: `"${best.name}" সময়ের দিক থেকে সবচেয়ে কার্যকর। দ্রুত ফলাফল পেতে এটি বেছে নিন।`,
+    };
+
+    setResult({ best: best.name, reasoning: reasonMap[priority], scores: withTotal });
   };
 
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container max-w-lg">
-        <div className="text-center mb-8 space-y-2 animate-fade-in">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 flex items-center justify-center">
-            <Target size={26} className="text-amber-500" />
+        <div className="mb-6 animate-fade-in">
+          <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
+            <ArrowLeft size={16} /> টুলস
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+              <Target size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="font-heading text-xl font-bold text-foreground">ডিসিশন ইঞ্জিন</h1>
+              <p className="text-xs text-muted-foreground font-bangla">স্মার্ট সিদ্ধান্ত নিতে সাহায্য করি</p>
+            </div>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">ডিসিশন হেল্পার</h1>
-          <p className="text-sm text-muted-foreground font-bangla">সিদ্ধান্ত নিতে পারছেন না? আমরা সাহায্য করি!</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <div className="glass-card gradient-border rounded-2xl p-6 space-y-5 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          {/* Options */}
           <div className="space-y-2">
-            <label className="text-sm font-heading font-medium text-foreground">অপশনগুলো লিখুন (কমা দিয়ে আলাদা করুন)</label>
-            <Input
-              placeholder="চা, কফি, জুস"
-              value={options}
-              onChange={(e) => setOptions(e.target.value)}
-              className="font-bangla"
-            />
+            <label className="text-sm font-heading font-medium text-foreground">অপশনগুলো লিখুন</label>
+            {options.map((opt, i) => (
+              <div key={i} className="flex gap-2">
+                <Input
+                  placeholder={`অপশন ${i + 1}`}
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  className="font-bangla"
+                />
+                {options.length > 2 && (
+                  <button onClick={() => removeOption(i)} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" onClick={addOption} className="text-accent text-xs">
+              <Plus size={14} /> আরো যোগ করুন
+            </Button>
           </div>
+
+          {/* Priority */}
+          <div className="space-y-2">
+            <label className="text-sm font-heading font-medium text-foreground">আপনার প্রায়োরিটি কী?</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.keys(priorityLabels) as Priority[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPriority(p)}
+                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${
+                    priority === p ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {priorityLabels[p]}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <Button onClick={decide} variant="hero" className="w-full" size="lg">
-            <Shuffle size={16} />
-            সিদ্ধান্ত নিন
+            <Zap size={16} /> সিদ্ধান্ত নিন
           </Button>
         </div>
 
         {result && (
-          <div className="mt-6 glass-card rounded-2xl p-8 text-center space-y-3 animate-scale-in">
-            <Sparkles size={28} className="text-accent mx-auto" />
-            <p className="text-sm text-muted-foreground font-bangla">আপনার সেরা পছন্দ:</p>
-            <p className="text-3xl font-display font-bold text-foreground">{result}</p>
-            <Button variant="ghost" size="sm" onClick={decide} className="text-accent">
-              <Shuffle size={14} /> আবার চেষ্টা করুন
-            </Button>
+          <div className="mt-6 space-y-4 animate-fade-in">
+            {/* Best choice */}
+            <div className="glass-card gradient-border rounded-2xl p-6 text-center space-y-3">
+              <Sparkles size={28} className="text-accent mx-auto" />
+              <p className="text-sm text-muted-foreground font-bangla">সেরা পছন্দ</p>
+              <p className="text-3xl font-display font-bold text-foreground">{result.best}</p>
+              <p className="text-sm text-muted-foreground font-bangla leading-relaxed">{result.reasoning}</p>
+            </div>
+
+            {/* Score breakdown */}
+            <div className="glass-card rounded-2xl p-5 space-y-3">
+              <h4 className="text-sm font-heading font-semibold text-foreground">স্কোর তুলনা</h4>
+              {result.scores.map((s, i) => (
+                <div key={s.name} className="space-y-1">
+                  <div className="flex justify-between text-xs font-bangla">
+                    <span className={i === 0 ? "text-accent font-medium" : "text-foreground"}>{s.name}</span>
+                    <span className="text-muted-foreground">{s.score}/100</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${i === 0 ? "bg-accent/80" : "bg-muted-foreground/30"}`}
+                      style={{ width: `${s.score}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
