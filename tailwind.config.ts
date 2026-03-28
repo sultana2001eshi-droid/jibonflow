@@ -18,6 +18,9 @@ export default {
         heading: ["Poppins", "sans-serif"],
         body: ["Inter", "Noto Sans Bengali", "sans-serif"],
         bangla: ["Noto Sans Bengali", "sans-serif"],
+        "bangla-display": ["Baloo Da 2", "Noto Sans Bengali", "sans-serif"],
+        "bangla-serif": ["Tiro Bangla", "Noto Sans Bengali", "serif"],
+        "bangla-heading": ["Hind Siliguri", "Noto Sans Bengali", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
