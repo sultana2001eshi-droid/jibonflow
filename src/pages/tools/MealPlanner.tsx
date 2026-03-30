@@ -2,93 +2,169 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { UtensilsCrossed, ArrowLeft, ChefHat, Shuffle, Users, ShoppingCart } from "lucide-react";
+import { UtensilsCrossed, ArrowLeft, ChefHat, Shuffle, Users, ShoppingCart, Clock, Copy, Check, Lightbulb, Heart } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 
-type MealOption = {
+type MealType = "rice" | "snack" | "dinner" | "light";
+type CookMode = "cook" | "outside";
+
+type MealSuggestion = {
   name: string;
   items: string[];
   cost: number;
   cookTime: string;
+  recipe: string[];
+  missing: string[];
+  healthNote: string;
+  why: string;
 };
 
-type MealPlan = {
-  morning: MealOption;
-  lunch: MealOption;
-  dinner: MealOption;
-  totalCost: number;
-  outsideComparison: number;
-};
-
-const ingredients = [
-  "চাল", "ডাল", "আলু", "পেঁয়াজ", "রসুন", "মুরগি", "ডিম", "মাছ",
-  "টমেটো", "শসা", "লেবু", "তেল", "মশলা", "আটা", "দুধ", "সবজি",
+const allIngredients = [
+  "চাল", "ডাল", "আলু", "পেঁয়াজ", "রসুন", "আদা", "মুরগি", "ডিম", "মাছ",
+  "টমেটো", "শসা", "লেবু", "তেল", "মশলা", "আটা", "দুধ", "সবজি", "পনির",
+  "নুডলস", "ব্রেড", "মাখন", "চিনি", "লবণ", "মরিচ", "ধনেপাতা",
 ];
 
-const generateMealPlan = (budget: number, people: number, available: string[], wantCook: boolean): MealPlan => {
-  const perPerson = budget / people;
-  const hasChicken = available.includes("মুরগি");
-  const hasFish = available.includes("মাছ");
-  const hasEgg = available.includes("ডিম");
-  const hasFlour = available.includes("আটা");
-
-  // Add randomness
-  const rand = Math.random();
-
-  let morning: MealOption, lunch: MealOption, dinner: MealOption;
-
-  if (perPerson >= 150) {
-    const morningOptions: MealOption[] = [
-      hasFlour
-        ? { name: "পরোটা সেট", items: ["পরোটা", "ডিমভুজি", "চা", "কলা"], cost: Math.round(35 * people), cookTime: "২০ মিনিট" }
-        : { name: "ভাত সেট", items: ["ভাত", "ডিম ভাজি", "আলু ভর্তা", "চা"], cost: Math.round(30 * people), cookTime: "২৫ মিনিট" },
-      { name: "নুডলস ব্রেকফাস্ট", items: ["নুডলস", "ডিম", "সবজি", "চা"], cost: Math.round(28 * people), cookTime: "১৫ মিনিট" },
-    ];
-    morning = morningOptions[Math.floor(rand * morningOptions.length)];
-
-    const lunchOptions: MealOption[] = [];
-    if (hasChicken) lunchOptions.push({ name: "চিকেন সেট", items: ["ভাত", "মুরগির তরকারি", "ডাল", "সালাদ"], cost: Math.round(65 * people), cookTime: "৪৫ মিনিট" });
-    if (hasFish) lunchOptions.push({ name: "মাছের সেট", items: ["ভাত", "মাছের ঝোল", "ভর্তা", "সবজি"], cost: Math.round(60 * people), cookTime: "৪০ মিনিট" });
-    lunchOptions.push({ name: "মিক্সড সেট", items: ["ভাত", "ডাল", "সবজি ভাজি", "ভর্তা", "সালাদ"], cost: Math.round(45 * people), cookTime: "৩৫ মিনিট" });
-    lunch = lunchOptions[Math.floor(Math.random() * lunchOptions.length)];
-
-    const dinnerOptions: MealOption[] = [
-      { name: "খিচুড়ি ডিনার", items: ["খিচুড়ি", "বেগুনি", "সালাদ"], cost: Math.round(35 * people), cookTime: "৩৫ মিনিট" },
-      { name: "রুটি ডিনার", items: ["রুটি", "মুরগি/সবজি", "ডাল"], cost: Math.round(40 * people), cookTime: "৩০ মিনিট" },
-    ];
-    dinner = dinnerOptions[Math.floor(Math.random() * dinnerOptions.length)];
-  } else if (perPerson >= 80) {
-    morning = { name: "সিম্পল ব্রেকফাস্ট", items: ["রুটি", hasEgg ? "ডিম সেদ্ধ" : "আলু ভর্তা", "চা"], cost: Math.round(20 * people), cookTime: "১৫ মিনিট" };
-    lunch = { name: "বাজেট লাঞ্চ", items: ["ভাত", "ডাল", hasEgg ? "ডিম কারি" : "আলু ভাজি", "ভর্তা"], cost: Math.round(35 * people), cookTime: "৩০ মিনিট" };
-    dinner = { name: "সহজ ডিনার", items: ["ভাত", "সবজি", "ডাল"], cost: Math.round(25 * people), cookTime: "২৫ মিনিট" };
-  } else {
-    morning = { name: "মিনিমাল ব্রেকফাস্ট", items: ["মুড়ি", "চা"], cost: Math.round(10 * people), cookTime: "৫ মিনিট" };
-    lunch = { name: "ইকোনমি লাঞ্চ", items: ["ভাত", "ডাল", "আলু ভর্তা"], cost: Math.round(25 * people), cookTime: "২০ মিনিট" };
-    dinner = { name: "লাইট ডিনার", items: ["রুটি", "সবজি"], cost: Math.round(15 * people), cookTime: "১৫ মিনিট" };
-  }
-
-  const totalCost = morning.cost + lunch.cost + dinner.cost;
-  const outsideComparison = Math.round(totalCost * (wantCook ? 2.2 : 1));
-
-  if (!wantCook) {
-    morning = { ...morning, name: morning.name + " (বাইরে)", cost: Math.round(morning.cost * 2), cookTime: "—" };
-    lunch = { ...lunch, name: lunch.name + " (বাইরে)", cost: Math.round(lunch.cost * 2.2), cookTime: "—" };
-    dinner = { ...dinner, name: dinner.name + " (বাইরে)", cost: Math.round(dinner.cost * 2), cookTime: "—" };
-  }
-
-  return {
-    morning, lunch, dinner,
-    totalCost: morning.cost + lunch.cost + dinner.cost,
-    outsideComparison: wantCook ? outsideComparison : Math.round((morning.cost + lunch.cost + dinner.cost) / 2.1),
-  };
+const mealTypeLabels: Record<MealType, string> = {
+  rice: "🍚 ভাতের সেট", snack: "🥪 নাস্তা", dinner: "🌙 রাতের খাবার", light: "🥗 হালকা",
 };
+
+function generateMeals(
+  budget: number, people: number, available: string[],
+  cookTime: number, cookMode: CookMode, mealType: MealType
+): MealSuggestion[] {
+  const perPerson = budget / people;
+  const has = (i: string) => available.includes(i);
+  const isOutside = cookMode === "outside";
+  const costMult = isOutside ? 2.0 : 1.0;
+  const now = Date.now();
+
+  // Large pool of meals categorized
+  type MealDef = {
+    name: string; items: string[]; baseCost: number; time: number;
+    needs: string[]; recipe: string[]; health: string; types: MealType[];
+  };
+
+  const mealPool: MealDef[] = [
+    { name: "ডিম ভুনা + ভাত", items: ["ভাত", "ডিম ভুনা", "আলু ভর্তা", "সালাদ"], baseCost: 35, time: 25,
+      needs: ["ডিম", "চাল", "পেঁয়াজ", "তেল"], recipe: ["তেলে পেঁয়াজ ভাজুন", "ডিম ভেঙে মশলা দিয়ে ভুনুন", "ভাত রান্না করুন", "আলু সেদ্ধ করে ভর্তা করুন"],
+      health: "প্রোটিন সমৃদ্ধ, সুষম খাবার", types: ["rice", "dinner"] },
+    { name: "মুরগির তরকারি সেট", items: ["ভাত", "মুরগির তরকারি", "ডাল", "সালাদ"], baseCost: 70, time: 45,
+      needs: ["মুরগি", "চাল", "পেঁয়াজ", "মশলা"], recipe: ["মুরগি ধুয়ে মশলায় মাখান", "তেলে পেঁয়াজ-রসুন ভাজুন", "মুরগি দিয়ে রান্না করুন ৩০ মিনিট", "আলাদা ভাবে ডাল রান্না করুন"],
+      health: "হাই প্রোটিন, শক্তিদায়ক খাবার", types: ["rice", "dinner"] },
+    { name: "মাছের ঝোল সেট", items: ["ভাত", "মাছের ঝোল", "ভর্তা", "সবজি ভাজি"], baseCost: 60, time: 40,
+      needs: ["মাছ", "চাল", "পেঁয়াজ", "মশলা"], recipe: ["মাছ ধুয়ে হলুদ-লবণ মাখান", "তেলে মাছ হালকা ভাজুন", "ঝোলের মশলা তৈরি করে মাছ দিন", "আলু-সবজি ভর্তা করুন"],
+      health: "ওমেগা-৩ সমৃদ্ধ, হৃদরোগ প্রতিরোধক", types: ["rice", "dinner"] },
+    { name: "খিচুড়ি ও বেগুনি", items: ["খিচুড়ি", "বেগুনি", "ডিম ভাজি", "সালাদ"], baseCost: 40, time: 35,
+      needs: ["চাল", "ডাল", "তেল", "মশলা"], recipe: ["চাল-ডাল ধুয়ে একসাথে রান্না", "বেগুন পাতলা করে কেটে ভাজুন", "ঘি বা তেল দিয়ে পরিবেশন"],
+      health: "হজমে সহায়ক, পুষ্টিকর", types: ["rice", "dinner", "light"] },
+    { name: "ডাল-ভাত-ভর্তা", items: ["ভাত", "মসুর ডাল", "আলু ভর্তা", "পেঁয়াজ কুচি"], baseCost: 25, time: 20,
+      needs: ["চাল", "ডাল", "আলু", "পেঁয়াজ"], recipe: ["ভাত রান্না করুন", "ডাল সেদ্ধ করে ফোড়ন দিন", "আলু সেদ্ধ করে চেপে মশলা মেশান"],
+      health: "সবচেয়ে সাশ্রয়ী সুষম খাবার", types: ["rice"] },
+    { name: "পরোটা ও ডিম", items: ["পরোটা", "ডিমভুজি", "চা", "কলা"], baseCost: 35, time: 20,
+      needs: ["আটা", "ডিম", "তেল"], recipe: ["আটা মেখে পরোটা বানান", "ডিম ভেঙে পেঁয়াজ দিয়ে ভুজি করুন", "চা তৈরি করুন"],
+      health: "শক্তিদায়ক সকালের নাস্তা", types: ["snack"] },
+    { name: "নুডলস + ডিম", items: ["ম্যাগি/নুডলস", "ডিম পোচ", "সবজি কুচি"], baseCost: 25, time: 12,
+      needs: ["নুডলস", "ডিম"], recipe: ["পানি ফুটান ও নুডলস দিন", "সবজি কুচি যোগ করুন", "ডিম পোচ করে উপরে দিন"],
+      health: "দ্রুত তৈরি, মাঝারি পুষ্টি", types: ["snack", "light"] },
+    { name: "রুটি ও সবজি", items: ["রুটি", "মিক্সড সবজি", "ডাল"], baseCost: 30, time: 25,
+      needs: ["আটা", "সবজি", "ডাল"], recipe: ["আটা মেখে রুটি বানান", "সবজি কুচি করে রান্না করুন", "ডাল ফোড়ন দিন"],
+      health: "ফাইবার সমৃদ্ধ, হালকা ও স্বাস্থ্যকর", types: ["dinner", "light"] },
+    { name: "ভাজা ভাত (ফ্রাইড রাইস)", items: ["ফ্রাইড রাইস", "ডিম", "সবজি", "সয়াসস"], baseCost: 35, time: 15,
+      needs: ["চাল", "ডিম", "সবজি", "তেল"], recipe: ["বাসি/ঠান্ডা ভাত ব্যবহার করুন", "ডিম ভেজে সরান", "সবজি ভাজুন, ভাত-ডিম মিশান", "সয়াসস দিন"],
+      health: "দ্রুত ও মজাদার", types: ["rice", "dinner"] },
+    { name: "দই চিঁড়া", items: ["চিঁড়া", "দই", "কলা", "গুড়"], baseCost: 20, time: 5,
+      needs: ["দুধ"], recipe: ["চিঁড়া ভিজিয়ে রাখুন", "দই ও গুড় মেশান", "কলা কুচি দিন"],
+      health: "হজমে ভালো, প্রোবায়োটিক", types: ["snack", "light"] },
+    { name: "আলু পরোটা", items: ["আলু পরোটা", "আচার", "চা"], baseCost: 25, time: 20,
+      needs: ["আটা", "আলু", "তেল"], recipe: ["আলু সেদ্ধ করে মশলায় মাখান", "আটার ভেতর আলু ভরে পরোটা বানান", "তেলে ভাজুন"],
+      health: "কার্বোহাইড্রেট সমৃদ্ধ, শক্তি দেয়", types: ["snack"] },
+    { name: "সবজি স্যুপ", items: ["মিক্সড সবজি স্যুপ", "ব্রেড", "লেবু"], baseCost: 20, time: 15,
+      needs: ["সবজি", "লেবু"], recipe: ["সবজি কুচি করে পানিতে সেদ্ধ করুন", "লবণ-গোলমরিচ দিন", "লেবু চিপে পরিবেশন"],
+      health: "লো ক্যালরি, ভিটামিন সমৃদ্ধ", types: ["light"] },
+  ];
+
+  // Outside versions
+  const outsideMeals: MealDef[] = [
+    { name: "হোটেলের ভাত-মাংস", items: ["ভাত", "গরুর মাংস/মুরগি", "ডাল", "সালাদ"], baseCost: 100, time: 0,
+      needs: [], recipe: ["নিকটস্থ হোটেলে যান", "সেট মেনু অর্ডার করুন"], health: "পরিমাণ মতো খান, ভাজাপোড়া এড়িয়ে চলুন", types: ["rice", "dinner"] },
+    { name: "ফুড কোর্ট বিরিয়ানি", items: ["বিরিয়ানি", "বোরহানি", "সালাদ"], baseCost: 120, time: 0,
+      needs: [], recipe: ["ফুড কোর্ট/রেস্তোরাঁ থেকে অর্ডার করুন"], health: "ক্যালরি বেশি, মাঝেমধ্যে খান", types: ["rice", "dinner"] },
+    { name: "চা-সিঙ্গারা নাস্তা", items: ["সিঙ্গারা", "সমুচা", "চা"], baseCost: 30, time: 0,
+      needs: [], recipe: ["নিকটস্থ চায়ের দোকানে যান"], health: "ভাজা খাবার, নিয়মিত না খাওয়াই ভালো", types: ["snack", "light"] },
+    { name: "রেস্তোরাঁ সেট মেনু", items: ["ভাত", "তরকারি", "ভর্তা", "ড্রিংকস"], baseCost: 150, time: 0,
+      needs: [], recipe: ["রেস্তোরাঁ থেকে সেট মেনু নিন"], health: "মাঝারি পুষ্টি, দাম বেশি", types: ["rice", "dinner"] },
+  ];
+
+  // Filter by type, time, and ingredient availability
+  const pool = isOutside ? outsideMeals : mealPool;
+  let candidates = pool.filter((m) => m.types.includes(mealType));
+  if (!isOutside) {
+    candidates = candidates.filter((m) => m.time <= cookTime || cookTime >= 40);
+  }
+
+  // Score each meal
+  const scored = candidates.map((m) => {
+    let score = 0;
+    const adjustedCost = Math.round(m.baseCost * people * costMult);
+
+    // Budget fit (closer to budget = better)
+    if (adjustedCost <= budget) score += 30;
+    if (adjustedCost <= budget * 0.7) score += 10;
+
+    // Ingredient match
+    const matchCount = m.needs.filter((n) => has(n)).length;
+    const matchRatio = m.needs.length > 0 ? matchCount / m.needs.length : 1;
+    score += Math.round(matchRatio * 40);
+
+    // Time fit
+    if (m.time <= cookTime) score += 20;
+
+    // Add randomness for variety
+    score += ((now + m.name.length * 7) % 15);
+
+    const missing = m.needs.filter((n) => !has(n));
+
+    return { ...m, score, adjustedCost, missing, matchRatio };
+  });
+
+  // Sort by score and pick top 3
+  scored.sort((a, b) => b.score - a.score);
+  const top = scored.slice(0, Math.min(3, scored.length));
+
+  const whyReasons = [
+    (m: typeof top[0]) => m.matchRatio === 1
+      ? `আপনার বাসায় সব উপকরণ আছে — ${m.name} সবচেয়ে সুবিধাজনক।`
+      : `উপকরণের ${Math.round(m.matchRatio * 100)}% মিলেছে এবং বাজেটের মধ্যে আছে।`,
+    (m: typeof top[0]) => m.adjustedCost <= budget * 0.5
+      ? `বাজেটের অর্ধেকেই হয়ে যাবে — বাকি টাকা সেভ করুন।`
+      : `আপনার বাজেট ৳${budget} এর মধ্যে ভালো অপশন।`,
+    (m: typeof top[0]) => m.time <= 15
+      ? `মাত্র ${m.time} মিনিটে তৈরি — সময় বাঁচান।`
+      : `${m.time} মিনিটে পূর্ণাঙ্গ খাবার তৈরি হবে।`,
+  ];
+
+  return top.map((m, i): MealSuggestion => ({
+    name: m.name,
+    items: m.items,
+    cost: m.adjustedCost,
+    cookTime: isOutside ? "—" : `${m.time} মিনিট`,
+    recipe: m.recipe,
+    missing: m.missing,
+    healthNote: m.health,
+    why: whyReasons[i % whyReasons.length](m),
+  }));
+}
 
 const MealPlanner = () => {
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("1");
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [wantCook, setWantCook] = useState(true);
-  const [plan, setPlan] = useState<MealPlan | null>(null);
+  const [cookTime, setCookTime] = useState("30");
+  const [cookMode, setCookMode] = useState<CookMode>("cook");
+  const [mealType, setMealType] = useState<MealType>("rice");
+  const [results, setResults] = useState<MealSuggestion[] | null>(null);
+  const [copied, setCopied] = useState("");
 
   const toggleIngredient = (item: string) => {
     setSelectedIngredients((prev) =>
@@ -99,29 +175,18 @@ const MealPlanner = () => {
   const generate = () => {
     const b = parseFloat(budget) || 200;
     const p = parseInt(people) || 1;
-    setPlan(generateMealPlan(b, p, selectedIngredients, wantCook));
+    const t = parseInt(cookTime) || 30;
+    setResults(generateMeals(b, p, selectedIngredients, t, cookMode, mealType));
   };
 
-  const MealCard = ({ label, icon, meal }: { label: string; icon: string; meal: MealOption }) => (
-    <div className="bg-muted/50 rounded-xl p-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
-          <span className="text-xs text-accent font-heading font-semibold uppercase tracking-wide">{label}</span>
-        </div>
-        <span className="text-xs text-muted-foreground font-bangla">৳{meal.cost}</span>
-      </div>
-      <p className="text-sm font-heading font-semibold text-foreground">{meal.name}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {meal.items.map((item) => (
-          <span key={item} className="text-xs bg-background/80 rounded-lg px-2 py-1 text-muted-foreground font-bangla">{item}</span>
-        ))}
-      </div>
-      {meal.cookTime !== "—" && (
-        <p className="text-xs text-muted-foreground font-bangla">⏱ রান্নার সময়: {meal.cookTime}</p>
-      )}
-    </div>
-  );
+  const copyResult = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(""), 2000);
+  };
+
+  const cookTimeOptions = ["১৫", "২০", "৩০", "৪৫+"];
+  const cookTimeValues = ["15", "20", "30", "45"];
 
   return (
     <PageTransition>
@@ -136,38 +201,41 @@ const MealPlanner = () => {
                 <ChefHat size={22} className="text-white" />
               </div>
               <div>
-                <h1 className="font-heading text-xl font-bold text-foreground">মিল ইন্টেলিজেন্স</h1>
-                <p className="text-xs text-muted-foreground font-bangla">বাজেট ও উপকরণ অনুযায়ী খাবার পরিকল্পনা</p>
+                <h1 className="font-heading text-xl font-bold text-foreground">স্মার্ট মিল ইঞ্জিন</h1>
+                <p className="text-xs text-muted-foreground font-bangla">বাজেট, উপকরণ ও সময় অনুযায়ী মিল প্ল্যান</p>
               </div>
             </div>
           </div>
 
           <div className="glass-card gradient-border rounded-2xl p-6 space-y-5">
+            {/* Budget */}
             <div className="space-y-2">
               <label className="text-sm font-heading font-medium text-foreground flex items-center gap-2">
-                <ShoppingCart size={14} className="text-accent" /> আজকের খাবারের বাজেট (৳)
+                <ShoppingCart size={14} className="text-accent" /> আপনার বাজেট কত? (৳)
               </label>
               <Input type="number" placeholder="যেমন: ৩০০" value={budget} onChange={(e) => setBudget(e.target.value)} className="font-bangla" />
             </div>
 
+            {/* People */}
             <div className="space-y-2">
               <label className="text-sm font-heading font-medium text-foreground flex items-center gap-2">
                 <Users size={14} className="text-accent" /> কয়জন খাবে?
               </label>
               <div className="grid grid-cols-4 gap-2">
-                {["1", "2", "3", "4+"].map((n) => (
-                  <button key={n} onClick={() => setPeople(n === "4+" ? "4" : n)}
-                    className={`py-2 rounded-xl text-sm font-heading font-medium transition-all ${people === (n === "4+" ? "4" : n) ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                    {n}
+                {["1", "2", "3", "4"].map((n) => (
+                  <button key={n} onClick={() => setPeople(n)}
+                    className={`py-2 rounded-xl text-sm font-heading font-medium transition-all ${people === n ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                    {n === "4" ? "4+" : n}
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Ingredients */}
             <div className="space-y-2">
-              <label className="text-sm font-heading font-medium text-foreground">বাসায় যা আছে (সিলেক্ট করুন)</label>
+              <label className="text-sm font-heading font-medium text-foreground">বাসায় কি কি আছে? (সিলেক্ট করুন)</label>
               <div className="flex flex-wrap gap-2">
-                {ingredients.map((item) => (
+                {allIngredients.map((item) => (
                   <button key={item} onClick={() => toggleIngredient(item)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bangla font-medium transition-all ${selectedIngredients.includes(item) ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
                     {item}
@@ -176,57 +244,123 @@ const MealPlanner = () => {
               </div>
             </div>
 
+            {/* Cook time */}
+            <div className="space-y-2">
+              <label className="text-sm font-heading font-medium text-foreground flex items-center gap-2">
+                <Clock size={14} className="text-accent" /> রান্নার সময় (মিনিট)
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {cookTimeOptions.map((label, i) => (
+                  <button key={label} onClick={() => setCookTime(cookTimeValues[i])}
+                    className={`py-2 rounded-xl text-xs font-bangla font-medium transition-all ${cookTime === cookTimeValues[i] ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                    {label} মি.
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cook mode */}
             <div className="space-y-2">
               <label className="text-sm font-heading font-medium text-foreground">কিভাবে খেতে চান?</label>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setWantCook(true)}
-                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${wantCook ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                <button onClick={() => setCookMode("cook")}
+                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${cookMode === "cook" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
                   🍳 রান্না করব
                 </button>
-                <button onClick={() => setWantCook(false)}
-                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${!wantCook ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                <button onClick={() => setCookMode("outside")}
+                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${cookMode === "outside" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
                   🏪 বাইরে খাব
                 </button>
               </div>
             </div>
 
+            {/* Meal type */}
+            <div className="space-y-2">
+              <label className="text-sm font-heading font-medium text-foreground">খাবারের ধরন</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.keys(mealTypeLabels) as MealType[]).map((t) => (
+                  <button key={t} onClick={() => setMealType(t)}
+                    className={`py-2.5 rounded-xl text-xs font-bangla font-medium transition-all ${mealType === t ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                    {mealTypeLabels[t]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Button onClick={generate} variant="hero" className="w-full" size="lg">
-              <Shuffle size={16} /> মিল প্ল্যান তৈরি করুন
+              <Shuffle size={16} /> মিল সাজেশন দিন
             </Button>
           </div>
 
-          {plan && (
+          {/* Results */}
+          {results && results.length > 0 && (
             <div className="mt-6 space-y-4">
-              <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">
-                <h3 className="font-heading font-semibold text-foreground flex items-center gap-2">
-                  <UtensilsCrossed size={18} className="text-accent" /> আজকের মিল প্ল্যান
-                </h3>
-                <MealCard label="সকাল" icon="🌅" meal={plan.morning} />
-                <MealCard label="দুপুর" icon="☀️" meal={plan.lunch} />
-                <MealCard label="রাত" icon="🌙" meal={plan.dinner} />
-              </div>
+              {results.map((meal, i) => (
+                <div key={i} className={`glass-card rounded-2xl p-5 space-y-3 ${i === 0 ? "gradient-border" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {i === 0 && <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-heading font-semibold">🏆 সেরা পছন্দ</span>}
+                      {i === 1 && <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-heading">বিকল্প ১</span>}
+                      {i === 2 && <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-heading">বিকল্প ২</span>}
+                    </div>
+                    <span className="text-sm font-heading font-bold text-accent">৳{meal.cost}</span>
+                  </div>
 
-              <div className="glass-card rounded-2xl p-5 space-y-3">
-                <h4 className="font-heading font-semibold text-foreground text-sm">খরচের সারাংশ</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted/50 rounded-xl p-3 text-center">
-                    <p className="text-xs text-muted-foreground font-bangla">{wantCook ? "রান্না করলে" : "বাইরে খেলে"}</p>
-                    <p className="text-xl font-heading font-bold text-accent">৳{plan.totalCost}</p>
+                  <h4 className="font-heading font-bold text-foreground text-lg">{meal.name}</h4>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {meal.items.map((item) => (
+                      <span key={item} className="text-xs bg-muted rounded-lg px-2 py-1 text-muted-foreground font-bangla">{item}</span>
+                    ))}
                   </div>
-                  <div className="bg-muted/50 rounded-xl p-3 text-center">
-                    <p className="text-xs text-muted-foreground font-bangla">{wantCook ? "বাইরে খেলে" : "রান্না করলে"}</p>
-                    <p className="text-xl font-heading font-bold text-foreground">৳{plan.outsideComparison}</p>
+
+                  {meal.cookTime !== "—" && (
+                    <p className="text-xs text-muted-foreground font-bangla flex items-center gap-1">
+                      <Clock size={12} /> রান্নার সময়: {meal.cookTime}
+                    </p>
+                  )}
+
+                  {/* Why recommended */}
+                  <div className="bg-accent/10 rounded-xl p-3 flex items-start gap-2">
+                    <Lightbulb size={14} className="text-accent mt-0.5 shrink-0" />
+                    <p className="text-xs text-foreground font-bangla">{meal.why}</p>
                   </div>
+
+                  {/* Recipe steps */}
+                  {meal.recipe.length > 0 && cookMode === "cook" && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-heading font-semibold text-muted-foreground uppercase tracking-wide">রেসিপি স্টেপস</p>
+                      {meal.recipe.map((step, si) => (
+                        <p key={si} className="text-xs font-bangla text-muted-foreground flex items-start gap-2">
+                          <span className="text-accent font-heading font-bold shrink-0">{si + 1}.</span> {step}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Missing ingredients */}
+                  {meal.missing.length > 0 && (
+                    <div className="bg-destructive/10 rounded-xl p-3">
+                      <p className="text-xs font-bangla text-destructive">⚠️ কিনতে হবে: {meal.missing.join(", ")}</p>
+                    </div>
+                  )}
+
+                  {/* Health note */}
+                  <div className="flex items-center gap-2">
+                    <Heart size={12} className="text-accent" />
+                    <p className="text-xs font-bangla text-muted-foreground">{meal.healthNote}</p>
+                  </div>
+
+                  {/* Copy */}
+                  <button onClick={() => copyResult(`${meal.name}\n${meal.items.join(", ")}\nখরচ: ৳${meal.cost}\n${meal.recipe.join("\n")}`, `meal-${i}`)}
+                    className="text-xs text-muted-foreground hover:text-accent transition-colors flex items-center gap-1 font-heading">
+                    {copied === `meal-${i}` ? <><Check size={12} className="text-emerald-500" /> কপি হয়েছে</> : <><Copy size={12} /> কপি করুন</>}
+                  </button>
                 </div>
-                <p className="text-xs text-muted-foreground font-bangla text-center">
-                  {wantCook
-                    ? `🎉 রান্না করে সাশ্রয়: ৳${plan.outsideComparison - plan.totalCost}`
-                    : `💡 রান্না করলে বাঁচত: ৳${plan.totalCost - plan.outsideComparison}`}
-                </p>
-              </div>
+              ))}
 
               <Button onClick={generate} variant="ghost" className="w-full text-accent" size="sm">
-                <Shuffle size={14} /> অন্য প্ল্যান দেখুন
+                <Shuffle size={14} /> অন্য সাজেশন দেখুন
               </Button>
             </div>
           )}
