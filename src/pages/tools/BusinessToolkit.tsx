@@ -2,8 +2,49 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { Package, Copy, Check, ArrowLeft, TrendingUp, Receipt, Plus, Lightbulb } from "lucide-react";
+import { Package, Copy, Check, ArrowLeft, TrendingUp, Receipt, Plus, Lightbulb, AlertTriangle, Target } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+
+type ProfitResult = {
+  perUnit: number; totalProfit: number; margin: number;
+  totalRevenue: number; totalCost: number; suggestedPrice: number;
+  breakEvenQty: number; discountImpact: number;
+  insights: string[]; warnings: string[];
+};
+
+function calculateProfit(cost: number, sell: number, delivery: number, discount: number, qty: number): ProfitResult {
+  const effectiveSell = sell - discount;
+  const perUnit = effectiveSell - cost - delivery;
+  const totalProfit = perUnit * qty;
+  const totalRevenue = effectiveSell * qty;
+  const totalCost = (cost + delivery) * qty;
+  const margin = effectiveSell > 0 ? Math.round((perUnit / effectiveSell) * 100) : 0;
+  const suggestedPrice = Math.round(cost * 1.4 + delivery);
+
+  // Break-even: how many units to cover fixed costs (assuming delivery is per-unit)
+  const breakEvenQty = perUnit > 0 ? Math.ceil((cost * qty) / perUnit) : 0;
+
+  const discountImpact = discount * qty;
+
+  const insights: string[] = [];
+  const warnings: string[] = [];
+
+  if (margin >= 30) insights.push("✅ মার্জিন ভালো। এই দামে চালিয়ে যান।");
+  else if (margin >= 15) insights.push("💡 মার্জিন মোটামুটি। ভলিউম বাড়িয়ে লাভ বাড়ান।");
+  else if (margin > 0) insights.push("⚠️ মার্জিন কম। দাম বাড়ান বা খরচ কমান।");
+  else insights.push("🚨 লস হচ্ছে! এখনই দাম রিভিউ করুন।");
+
+  if (discount > 0 && discount > sell * 0.2) warnings.push(`⚠️ ডিসকাউন্ট বিক্রয়মূল্যের ${Math.round((discount / sell) * 100)}% — খুব বেশি!`);
+  if (delivery > cost * 0.3) warnings.push(`⚠️ ডেলিভারি চার্জ খরচের ${Math.round((delivery / cost) * 100)}% — কমানোর চেষ্টা করুন।`);
+  if (perUnit < 0) warnings.push("🚨 প্রতিটি পণ্যে লস হচ্ছে! দাম বাড়াতে হবে।");
+
+  if (suggestedPrice > sell && margin < 20) {
+    insights.push(`💰 সাজেস্টেড দাম: ৳${suggestedPrice} (৪০% মার্জিনের জন্য)`);
+  }
+  if (qty >= 50) insights.push("📦 বেশি পরিমাণে কিনলে ক্রয়মূল্য কমাতে পারেন।");
+
+  return { perUnit, totalProfit, margin, totalRevenue, totalCost, suggestedPrice, breakEvenQty, discountImpact, insights, warnings };
+}
 
 const BusinessToolkit = () => {
   const [tab, setTab] = useState<"profit" | "memo">("profit");
@@ -13,10 +54,8 @@ const BusinessToolkit = () => {
   const [sell, setSell] = useState("");
   const [qty, setQty] = useState("");
   const [delivery, setDelivery] = useState("");
-  const [profit, setProfit] = useState<null | {
-    perUnit: number; totalProfit: number; margin: number;
-    totalRevenue: number; totalCost: number; suggestedPrice: number; insight: string;
-  }>(null);
+  const [discount, setDiscount] = useState("");
+  const [profit, setProfit] = useState<ProfitResult | null>(null);
 
   // Memo state
   const [shopName, setShopName] = useState("");
@@ -29,17 +68,8 @@ const BusinessToolkit = () => {
     const s = parseFloat(sell) || 0;
     const q = parseFloat(qty) || 1;
     const d = parseFloat(delivery) || 0;
-    const perUnit = s - c - d;
-    const totalProfit = perUnit * q;
-    const totalRevenue = s * q;
-    const totalCost = (c + d) * q;
-    const margin = s > 0 ? Math.round((perUnit / s) * 100) : 0;
-    const suggestedPrice = Math.round(c * 1.4 + d);
-    let insight = "";
-    if (margin < 10) insight = "⚠️ মার্জিন খুব কম। দাম বাড়ান অথবা খরচ কমান।";
-    else if (margin < 25) insight = "💡 মার্জিন মোটামুটি। বেশি পরিমাণে বিক্রি করলে ভালো লাভ হবে।";
-    else insight = "✅ ভালো মার্জিন! এই দামে চালিয়ে যান।";
-    setProfit({ perUnit, totalProfit, margin, totalRevenue, totalCost, suggestedPrice, insight });
+    const disc = parseFloat(discount) || 0;
+    setProfit(calculateProfit(c, s, d, disc, q));
   };
 
   const generateMemo = () => {
@@ -73,71 +103,109 @@ const BusinessToolkit = () => {
                 <Package size={22} className="text-white" />
               </div>
               <div>
-                <h1 className="font-heading text-xl font-bold text-foreground">ব্যবসা পাওয়ার টুলস</h1>
-                <p className="text-xs text-muted-foreground font-bangla">প্রফিট ক্যালকুলেটর ও ক্যাশ মেমো</p>
+                <h1 className="font-heading text-xl font-bold text-foreground">বিজনেস ডিসিশন ইঞ্জিন</h1>
+                <p className="text-xs text-muted-foreground font-bangla">প্রফিট, মার্জিন ও ব্রেক-ইভেন বিশ্লেষণ</p>
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="flex gap-2 mb-6">
             {([
-              { key: "profit" as const, label: "প্রফিট", icon: TrendingUp },
-              { key: "memo" as const, label: "ক্যাশ মেমো", icon: Receipt },
+              { key: "profit" as const, label: "📊 প্রফিট এনালাইসিস" },
+              { key: "memo" as const, label: "🧾 ক্যাশ মেমো" },
             ]).map((t) => (
               <button key={t.key} onClick={() => setTab(t.key)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-bangla font-medium transition-all flex items-center justify-center gap-1.5 ${tab === t.key ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
-                <t.icon size={14} /> {t.label}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bangla font-medium transition-all ${tab === t.key ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                {t.label}
               </button>
             ))}
           </div>
 
           {tab === "profit" && (
             <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-heading font-medium text-foreground">ক্রয়মূল্য (৳)</label>
-                <Input type="number" placeholder="যেমন: ১০০" value={cost} onChange={(e) => setCost(e.target.value)} className="font-bangla" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-heading font-medium text-foreground">ক্রয়মূল্য (৳)</label>
+                  <Input type="number" placeholder="১০০" value={cost} onChange={(e) => setCost(e.target.value)} className="font-bangla" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-heading font-medium text-foreground">বিক্রয়মূল্য (৳)</label>
+                  <Input type="number" placeholder="১৫০" value={sell} onChange={(e) => setSell(e.target.value)} className="font-bangla" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-heading font-medium text-foreground">বিক্রয়মূল্য (৳)</label>
-                <Input type="number" placeholder="যেমন: ১৫০" value={sell} onChange={(e) => setSell(e.target.value)} className="font-bangla" />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-heading font-medium text-foreground">ডেলিভারি (৳)</label>
+                  <Input type="number" placeholder="২০" value={delivery} onChange={(e) => setDelivery(e.target.value)} className="font-bangla" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-heading font-medium text-foreground">ডিসকাউন্ট (৳)</label>
+                  <Input type="number" placeholder="১০" value={discount} onChange={(e) => setDiscount(e.target.value)} className="font-bangla" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-heading font-medium text-foreground">পরিমাণ</label>
+                  <Input type="number" placeholder="১০" value={qty} onChange={(e) => setQty(e.target.value)} className="font-bangla" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-heading font-medium text-foreground">ডেলিভারি চার্জ (৳)</label>
-                <Input type="number" placeholder="যেমন: ২০" value={delivery} onChange={(e) => setDelivery(e.target.value)} className="font-bangla" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-heading font-medium text-foreground">পরিমাণ</label>
-                <Input type="number" placeholder="যেমন: ১০" value={qty} onChange={(e) => setQty(e.target.value)} className="font-bangla" />
-              </div>
+
               <Button onClick={calcProfit} variant="hero" className="w-full" size="lg">
-                <TrendingUp size={16} /> হিসাব করুন
+                <TrendingUp size={16} /> প্রফিট বিশ্লেষণ
               </Button>
 
               {profit && (
                 <div className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-muted/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-muted-foreground font-bangla">একক লাভ</p>
-                      <p className={`text-lg font-heading font-bold ${profit.perUnit >= 0 ? "text-accent" : "text-destructive"}`}>৳{profit.perUnit}</p>
-                    </div>
-                    <div className="bg-muted/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-muted-foreground font-bangla">মোট লাভ</p>
-                      <p className={`text-lg font-heading font-bold ${profit.totalProfit >= 0 ? "text-accent" : "text-destructive"}`}>৳{profit.totalProfit.toLocaleString()}</p>
-                    </div>
-                    <div className="bg-muted/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-muted-foreground font-bangla">মার্জিন</p>
-                      <p className="text-lg font-heading font-bold text-foreground">{profit.margin}%</p>
-                    </div>
-                    <div className="bg-muted/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-muted-foreground font-bangla">সাজেস্টেড দাম</p>
-                      <p className="text-lg font-heading font-bold text-foreground">৳{profit.suggestedPrice}</p>
-                    </div>
+                    {[
+                      { label: "একক লাভ", value: `৳${profit.perUnit}`, positive: profit.perUnit >= 0 },
+                      { label: "মোট লাভ", value: `৳${profit.totalProfit.toLocaleString()}`, positive: profit.totalProfit >= 0 },
+                      { label: "মার্জিন", value: `${profit.margin}%`, positive: profit.margin >= 15 },
+                      { label: "সাজেস্টেড দাম", value: `৳${profit.suggestedPrice}`, positive: true },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-muted/50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-muted-foreground font-bangla">{item.label}</p>
+                        <p className={`text-lg font-heading font-bold ${item.positive ? "text-accent" : "text-destructive"}`}>{item.value}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-muted/30 rounded-xl p-4 flex items-start gap-2">
-                    <Lightbulb size={16} className="text-accent mt-0.5 shrink-0" />
-                    <p className="text-sm text-muted-foreground font-bangla">{profit.insight}</p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <p className="text-xs text-muted-foreground font-bangla">ব্রেক-ইভেন</p>
+                      <p className="text-sm font-heading font-bold text-foreground">{profit.breakEvenQty} ইউনিট</p>
+                    </div>
+                    {profit.discountImpact > 0 && (
+                      <div className="bg-muted/50 rounded-xl p-3 text-center">
+                        <p className="text-xs text-muted-foreground font-bangla">ডিসকাউন্ট লস</p>
+                        <p className="text-sm font-heading font-bold text-destructive">৳{profit.discountImpact.toLocaleString()}</p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Insights */}
+                  {profit.insights.length > 0 && (
+                    <div className="bg-accent/10 rounded-xl p-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Lightbulb size={14} className="text-accent" />
+                        <span className="text-xs font-heading font-semibold text-foreground">ইনসাইটস</span>
+                      </div>
+                      {profit.insights.map((ins, i) => (
+                        <p key={i} className="text-xs font-bangla text-foreground">{ins}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Warnings */}
+                  {profit.warnings.length > 0 && (
+                    <div className="bg-destructive/10 rounded-xl p-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={14} className="text-destructive" />
+                        <span className="text-xs font-heading font-semibold text-foreground">সতর্কতা</span>
+                      </div>
+                      {profit.warnings.map((w, i) => (
+                        <p key={i} className="text-xs font-bangla text-foreground">{w}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -153,9 +221,9 @@ const BusinessToolkit = () => {
               <label className="text-sm font-heading font-medium text-foreground block">পণ্যের তালিকা</label>
               {items.map((item, i) => (
                 <div key={i} className="grid grid-cols-7 gap-2">
-                  <Input placeholder="পণ্য" value={item.name} onChange={(e) => { const n = [...items]; n[i].name = e.target.value; setItems(n); }} className="col-span-3 font-bangla text-sm" />
-                  <Input placeholder="দাম" type="number" value={item.price} onChange={(e) => { const n = [...items]; n[i].price = e.target.value; setItems(n); }} className="col-span-2 font-bangla text-sm" />
-                  <Input placeholder="সংখ্যা" type="number" value={item.qty} onChange={(e) => { const n = [...items]; n[i].qty = e.target.value; setItems(n); }} className="col-span-2 font-bangla text-sm" />
+                  <Input placeholder="পণ্য" value={item.name} onChange={(e) => { const n = [...items]; n[i] = { ...n[i], name: e.target.value }; setItems(n); }} className="col-span-3 font-bangla text-sm" />
+                  <Input placeholder="দাম" type="number" value={item.price} onChange={(e) => { const n = [...items]; n[i] = { ...n[i], price: e.target.value }; setItems(n); }} className="col-span-2 font-bangla text-sm" />
+                  <Input placeholder="সংখ্যা" type="number" value={item.qty} onChange={(e) => { const n = [...items]; n[i] = { ...n[i], qty: e.target.value }; setItems(n); }} className="col-span-2 font-bangla text-sm" />
                 </div>
               ))}
               <Button variant="ghost" size="sm" onClick={() => setItems([...items, { name: "", price: "", qty: "" }])} className="text-accent text-xs">
