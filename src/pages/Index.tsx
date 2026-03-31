@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
@@ -15,7 +15,7 @@ const tools = [
   { icon: Brain, title: "লাইফ অর্গানাইজার PRO", desc: "রুটিন ও ফোকাস প্ল্যানার", path: "/tools/organizer", gradient: "from-cyan-400 to-blue-500" },
   { icon: PenTool, title: "ক্যাপশন ল্যাব", desc: "স্মার্ট ক্যাপশন ও বায়ো", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "সেরা সিদ্ধান্ত নেয়ার সহায়তা", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
-  { icon: Clock, title: "টাইম সিস্টেম", desc: "সঠিক বয়স ও সময়ের হিসাব", path: "/tools/age", gradient: "from-violet-400 to-purple-500" },
+  { icon: Clock, title: "টাইম সিস্টেম", desc: "সঠিক বয়স ও সময়ের হিসাব", path: "/tools/time", gradient: "from-violet-400 to-purple-500" },
 ];
 
 const Particles = () => (
@@ -37,6 +37,8 @@ const fadeUp = {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -88,7 +90,7 @@ const Index = () => {
 
             {/* Interactive demo preview cards */}
             <motion.div variants={fadeUp} id="demo" className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <Link to="/tools/budget" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
+              <button type="button" onClick={() => navigate("/tools/budget")} className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group w-full">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
                     <TrendingUp size={16} className="text-white" />
@@ -115,9 +117,9 @@ const Index = () => {
                 <div className="mt-3 text-xs text-accent font-heading flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   ব্যবহার করুন <ArrowRight size={12} />
                 </div>
-              </Link>
+              </button>
 
-              <Link to="/tools/meal" className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group">
+              <button type="button" onClick={() => navigate("/tools/meal")} className="glass-card rounded-2xl p-5 text-left border-accent/10 premium-shadow hover:border-accent/30 transition-all group w-full">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
                     <ChefHat size={16} className="text-white" />
@@ -142,7 +144,7 @@ const Index = () => {
                 <div className="mt-3 text-xs text-accent font-heading flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   ব্যবহার করুন <ArrowRight size={12} />
                 </div>
-              </Link>
+              </button>
             </motion.div>
           </motion.div>
         </div>
@@ -177,8 +179,9 @@ const Index = () => {
           >
             {tools.map((tool) => (
               <motion.div key={tool.path} variants={fadeUp}>
-                <Link
-                  to={tool.path}
+                <button
+                  type="button"
+                  onClick={() => navigate(tool.path)}
                   className="glass-card-hover gradient-border rounded-2xl p-6 group block"
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
@@ -189,7 +192,7 @@ const Index = () => {
                     <ArrowRight size={14} className="text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all opacity-0 group-hover:opacity-100" />
                   </h3>
                   <p className="text-sm text-muted-foreground font-bangla">{tool.desc}</p>
-                </Link>
+                </button>
               </motion.div>
             ))}
           </motion.div>

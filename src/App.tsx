@@ -40,6 +40,7 @@ const App = () => (
           <Route path="/tools/organizer" element={<LifeOrganizer />} />
           <Route path="/tools/caption" element={<CaptionGenerator />} />
           <Route path="/tools/decision" element={<DecisionHelper />} />
+          <Route path="/tools/time" element={<AgeCalculator />} />
           <Route path="/tools/age" element={<AgeCalculator />} />
           <Route path="/about" element={<About />} />
           <Route path="/settings" element={<Settings />} />

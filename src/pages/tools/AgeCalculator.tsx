@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, ArrowLeft, CalendarDays, Timer, Copy, Check, Sparkles } from "lucide-react";
+import { Clock, CalendarDays, Timer, Copy, Check, Sparkles, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 const AgeCalculator = () => {
+  useNavigate();
   const [birthdate, setBirthdate] = useState("");
   const [targetDate, setTargetDate] = useState("");
   const [eventName, setEventName] = useState("");
@@ -18,6 +21,8 @@ const AgeCalculator = () => {
     eventCountdown: number | null; eventName: string;
   }>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const dayNames = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
 
@@ -53,8 +58,17 @@ const AgeCalculator = () => {
     return "Baby Boomer (বুমার)";
   };
 
-  const calculate = () => {
-    if (!birthdate) return;
+  const handleAgeGenerate = async () => {
+    if (!birthdate) {
+      setError("জন্ম তারিখ দিন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+
     const birth = new Date(birthdate);
     const now = targetDate ? new Date(targetDate) : new Date();
 
@@ -89,6 +103,18 @@ const AgeCalculator = () => {
       generation: getGeneration(birth.getFullYear()),
       eventCountdown, eventName: eventName || "ইভেন্ট",
     });
+    setLoading(false);
+  };
+
+  const resetTool = () => {
+    setBirthdate("");
+    setTargetDate("");
+    setEventName("");
+    setEventDate("");
+    setResult(null);
+    setCopied(false);
+    setLoading(false);
+    setError("");
   };
 
   const copyAll = () => {
@@ -104,9 +130,7 @@ const AgeCalculator = () => {
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
                 <Clock size={22} className="text-white" />
@@ -138,10 +162,19 @@ const AgeCalculator = () => {
               <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
             </div>
 
-            <Button onClick={calculate} variant="hero" className="w-full" size="lg">হিসাব করুন</Button>
+            <div className="flex gap-3">
+              <Button onClick={handleAgeGenerate} disabled={!birthdate || loading} variant="hero" className="flex-1" size="lg">{loading ? "হিসাব হচ্ছে..." : "হিসাব করুন"}</Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+            {!error && !birthdate && <p className="text-sm font-bangla text-muted-foreground">জন্ম তারিখ দিলে বয়স ও কাউন্টডাউন দেখা যাবে।</p>}
           </div>
 
-          {result && (
+          {loading && <ToolResultSkeleton cards={2} />}
+          {result && !loading && (
             <div className="mt-6 space-y-4">
               {/* Age */}
               <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">

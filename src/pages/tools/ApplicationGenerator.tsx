@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { FileText, Copy, Check, ArrowLeft, Download, Eye } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { FileText, Copy, Check, Download, Eye, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type AppType = "leave" | "job" | "formal" | "complaint";
 
@@ -88,9 +90,30 @@ const ApplicationGenerator = () => {
   const [output, setOutput] = useState<{ full: string; short: string } | null>(null);
   const [viewMode, setViewMode] = useState<"full" | "short">("full");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const generate = () => {
+  const requiredFields: Record<AppType, string[]> = {
+    leave: ["name", "to", "institution", "reason", "days"],
+    job: ["name", "to", "institution", "position", "qualification"],
+    formal: ["name", "to", "institution", "subject", "body"],
+    complaint: ["name", "to", "institution", "subject", "body"],
+  };
+
+  const handleApplicationGenerate = async () => {
+    const missingField = requiredFields[type].find((key) => !(data[key] || "").trim());
+
+    if (missingField) {
+      setError("দরখাস্ত তৈরি করতে প্রয়োজনীয় তথ্য পূরণ করুন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
     setOutput(generateFormal(data, type));
+    setLoading(false);
   };
 
   const copy = () => {
@@ -111,14 +134,21 @@ const ApplicationGenerator = () => {
     URL.revokeObjectURL(url);
   };
 
+  const resetTool = () => {
+    setData({});
+    setOutput(null);
+    setViewMode("full");
+    setCopied(false);
+    setLoading(false);
+    setError("");
+  };
+
   return (
     <PageTransition>
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
                 <FileText size={22} className="text-white" />
@@ -145,11 +175,11 @@ const ApplicationGenerator = () => {
               <div key={f.key} className="space-y-1.5">
                 <label className="text-sm font-heading font-medium text-foreground">{f.label}</label>
                 {f.multiline ? (
-                  <textarea
+                  <Textarea
                     placeholder={f.placeholder}
                     value={data[f.key] || ""}
                     onChange={(e) => setData({ ...data, [f.key]: e.target.value })}
-                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bangla ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-y"
+                    className="font-bangla min-h-[96px]"
                   />
                 ) : (
                   <Input placeholder={f.placeholder} value={data[f.key] || ""} onChange={(e) => setData({ ...data, [f.key]: e.target.value })} className="font-bangla" />
@@ -157,12 +187,20 @@ const ApplicationGenerator = () => {
               </div>
             ))}
 
-            <Button onClick={generate} variant="hero" className="w-full" size="lg">
-              <Eye size={16} /> তৈরি করুন
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleApplicationGenerate} disabled={loading} variant="hero" className="flex-1" size="lg">
+                <Eye size={16} /> {loading ? "দরখাস্ত তৈরি হচ্ছে..." : "তৈরি করুন"}
+              </Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
           </div>
 
-          {output && (
+          {loading && <ToolResultSkeleton cards={1} />}
+          {output && !loading && (
             <div className="mt-6 glass-card gradient-border rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-heading font-semibold text-foreground">আপনার দরখাস্ত</h3>

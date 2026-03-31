@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { Wallet, TrendingUp, Lightbulb, ArrowLeft, AlertTriangle, PieChart, Plus, X, Copy, Check, Target } from "lucide-react";
+import { Wallet, TrendingUp, Lightbulb, AlertTriangle, PieChart, Plus, X, Copy, Check, Target, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type Category = { name: string; amount: string; icon: string };
 
@@ -118,6 +119,8 @@ const BudgetPlanner = () => {
   const [savingsGoal, setSavingsGoal] = useState("");
   const [result, setResult] = useState<BudgetResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const addCategory = () => {
     if (newCat.trim()) {
@@ -132,11 +135,33 @@ const BudgetPlanner = () => {
     setCategories(updated);
   };
 
-  const calculate = () => {
+  const handleBudgetCalculate = async () => {
     const inc = parseFloat(income) || 0;
-    if (inc <= 0) return;
+    if (inc <= 0) {
+      setError("মাসিক আয় সঠিকভাবে লিখুন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
     setResult(analyzeBudget(inc, categories, savingsGoal));
+    setLoading(false);
   };
+
+  const resetTool = () => {
+    setIncome("");
+    setCategories(defaultCategories);
+    setNewCat("");
+    setSavingsGoal("");
+    setResult(null);
+    setCopied(false);
+    setLoading(false);
+    setError("");
+  };
+
+  const canCalculate = Boolean(income.trim() && Number(income) > 0);
 
   const copyReport = () => {
     if (!result) return;
@@ -151,9 +176,7 @@ const BudgetPlanner = () => {
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
                 <Wallet size={22} className="text-white" />
@@ -187,7 +210,7 @@ const BudgetPlanner = () => {
               ))}
               <div className="flex gap-2">
                 <Input placeholder="নতুন ক্যাটাগরি" value={newCat} onChange={(e) => setNewCat(e.target.value)} className="font-bangla text-sm" />
-                <Button variant="ghost" size="sm" onClick={addCategory} className="text-accent shrink-0"><Plus size={16} /></Button>
+              <Button variant="ghost" size="sm" type="button" onClick={addCategory} className="text-accent shrink-0"><Plus size={16} /></Button>
               </div>
             </div>
 
@@ -198,12 +221,21 @@ const BudgetPlanner = () => {
               <Input type="number" placeholder="যেমন: ৫০,০০০ — কত টাকা জমাতে চান?" value={savingsGoal} onChange={(e) => setSavingsGoal(e.target.value)} className="font-bangla" />
             </div>
 
-            <Button onClick={calculate} variant="hero" className="w-full" size="lg">
-              <PieChart size={16} /> বিশ্লেষণ করুন
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleBudgetCalculate} disabled={!canCalculate || loading} variant="hero" className="flex-1" size="lg">
+                <PieChart size={16} /> {loading ? "বিশ্লেষণ চলছে..." : "বিশ্লেষণ করুন"}
+              </Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+            {!error && !canCalculate && <p className="text-sm font-bangla text-muted-foreground">প্রথমে মাসিক আয় লিখুন।</p>}
           </div>
 
-          {result && (
+          {loading && <ToolResultSkeleton cards={2} />}
+          {result && !loading && (
             <div className="mt-6 space-y-4">
               {/* Summary */}
               <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">

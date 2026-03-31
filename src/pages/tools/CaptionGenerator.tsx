@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PenTool, Copy, Check, ArrowLeft, Sparkles, Hash, RefreshCw } from "lucide-react";
+import { PenTool, Copy, Check, Sparkles, Hash, RefreshCw, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type Niche = "food" | "fashion" | "gadget" | "service";
 type Tone = "emotional" | "professional" | "funny" | "urgent";
@@ -156,12 +157,24 @@ const CaptionGenerator = () => {
   const [platform, setPlatform] = useState<Platform>("fb");
   const [result, setResult] = useState<ReturnType<typeof generateCaptions> | null>(null);
   const [copied, setCopied] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [bioName, setBioName] = useState("");
   const [bio, setBio] = useState("");
 
-  const generate = () => {
+  const handleCaptionGenerate = async () => {
+    if (!product.trim()) {
+      setError("পণ্য বা বিষয় লিখুন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
     setResult(generateCaptions(product, niche, tone, audience, hasOffer, platform));
+    setLoading(false);
   };
 
   const genBio = () => {
@@ -175,6 +188,19 @@ const CaptionGenerator = () => {
     setTimeout(() => setCopied(""), 2000);
   };
 
+  const resetTool = () => {
+    setProduct("");
+    setNiche("food");
+    setTone("emotional");
+    setAudience("general");
+    setHasOffer(false);
+    setPlatform("fb");
+    setResult(null);
+    setCopied("");
+    setLoading(false);
+    setError("");
+  };
+
   const CopyBtn = ({ text, id }: { text: string; id: string }) => (
     <button onClick={() => copy(text, id)} className="absolute top-3 right-3 text-muted-foreground hover:text-accent transition-colors">
       {copied === id ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
@@ -186,9 +212,7 @@ const CaptionGenerator = () => {
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
                 <PenTool size={22} className="text-white" />
@@ -262,13 +286,22 @@ const CaptionGenerator = () => {
               </button>
             </div>
 
-            <Button onClick={generate} variant="hero" className="w-full" size="lg">
-              <Sparkles size={16} /> ক্যাপশন তৈরি করুন
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleCaptionGenerate} disabled={!product.trim() || loading} variant="hero" className="flex-1" size="lg">
+                <Sparkles size={16} /> {loading ? "ক্যাপশন তৈরি হচ্ছে..." : "ক্যাপশন তৈরি করুন"}
+              </Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+            {!error && !product.trim() && <p className="text-sm font-bangla text-muted-foreground">একটি পণ্য বা বিষয় লিখলে ৩টি ইউনিক ক্যাপশন তৈরি হবে।</p>}
           </div>
 
           {/* Results */}
-          {result && (
+          {loading && <ToolResultSkeleton cards={3} />}
+          {result && !loading && (
             <div className="mt-6 space-y-4">
               {/* 3 Unique Captions */}
               {result.captions.map((cap, i) => (
@@ -308,7 +341,7 @@ const CaptionGenerator = () => {
                 <CopyBtn text={result.hashtags.join(" ")} id="tags" />
               </div>
 
-              <Button onClick={generate} variant="ghost" className="w-full text-accent" size="sm">
+              <Button onClick={handleCaptionGenerate} variant="ghost" className="w-full text-accent" size="sm">
                 <RefreshCw size={14} /> নতুন ক্যাপশন তৈরি করুন
               </Button>
             </div>
