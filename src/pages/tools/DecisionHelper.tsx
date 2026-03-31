@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { Target, Sparkles, ArrowLeft, Plus, X, Zap, Copy, Check } from "lucide-react";
+import { Target, Sparkles, Plus, X, Zap, Copy, Check, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type Priority = "price" | "quality" | "time" | "longterm";
 const priorityLabels: Record<Priority, string> = {
@@ -20,14 +21,24 @@ const DecisionHelper = () => {
     reasoning: string; allScored: ScoredOption[];
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const addOption = () => setOptions([...options, ""]);
   const removeOption = (i: number) => { if (options.length > 2) setOptions(options.filter((_, idx) => idx !== i)); };
   const updateOption = (i: number, val: string) => { const n = [...options]; n[i] = val; setOptions(n); };
 
-  const decide = () => {
+  const handleDecisionGenerate = async () => {
     const valid = options.filter((o) => o.trim());
-    if (valid.length < 2) return;
+    if (valid.length < 2) {
+      setError("কমপক্ষে ২টি অপশন দিন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
 
     const now = Date.now();
     const scored: ScoredOption[] = valid.map((name, idx) => {
@@ -67,6 +78,7 @@ const DecisionHelper = () => {
     };
 
     setResult({ best, runnerUp, reasoning: reasonMap[priority], allScored: scored });
+    setLoading(false);
   };
 
   const copyResult = () => {
@@ -77,14 +89,23 @@ const DecisionHelper = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const resetTool = () => {
+    setOptions(["", ""]);
+    setPriority("quality");
+    setResult(null);
+    setCopied(false);
+    setLoading(false);
+    setError("");
+  };
+
+  const validOptionsCount = options.filter((option) => option.trim()).length;
+
   return (
     <PageTransition>
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
                 <Target size={22} className="text-white" />
@@ -109,7 +130,7 @@ const DecisionHelper = () => {
                   )}
                 </div>
               ))}
-              <Button variant="ghost" size="sm" onClick={addOption} className="text-accent text-xs">
+              <Button variant="ghost" size="sm" type="button" onClick={addOption} className="text-accent text-xs">
                 <Plus size={14} /> আরো যোগ করুন
               </Button>
             </div>
@@ -126,12 +147,21 @@ const DecisionHelper = () => {
               </div>
             </div>
 
-            <Button onClick={decide} variant="hero" className="w-full" size="lg">
-              <Zap size={16} /> সিদ্ধান্ত নিন
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleDecisionGenerate} disabled={validOptionsCount < 2 || loading} variant="hero" className="flex-1" size="lg">
+                <Zap size={16} /> {loading ? "বিশ্লেষণ চলছে..." : "সিদ্ধান্ত নিন"}
+              </Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+            {!error && validOptionsCount < 2 && <p className="text-sm font-bangla text-muted-foreground">কমপক্ষে ২টি অপশন দিন।</p>}
           </div>
 
-          {result && (
+          {loading && <ToolResultSkeleton cards={2} />}
+          {result && !loading && (
             <div className="mt-6 space-y-4">
               {/* Best choice */}
               <div className="glass-card gradient-border rounded-2xl p-6 text-center space-y-3">

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { Package, Copy, Check, ArrowLeft, TrendingUp, Receipt, Plus, Lightbulb, AlertTriangle, Target } from "lucide-react";
+import { Package, Copy, Check, TrendingUp, Receipt, Plus, Lightbulb, AlertTriangle, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type ProfitResult = {
   perUnit: number; totalProfit: number; margin: number;
@@ -62,14 +63,27 @@ const BusinessToolkit = () => {
   const [items, setItems] = useState([{ name: "", price: "", qty: "" }]);
   const [memo, setMemo] = useState("");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const calcProfit = () => {
+  const handleProfitCalculate = async () => {
     const c = parseFloat(cost) || 0;
     const s = parseFloat(sell) || 0;
     const q = parseFloat(qty) || 1;
     const d = parseFloat(delivery) || 0;
     const disc = parseFloat(discount) || 0;
+
+    if (c <= 0 || s <= 0 || q <= 0) {
+      setError("ক্রয়মূল্য, বিক্রয়মূল্য ও পরিমাণ সঠিকভাবে দিন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
     setProfit(calculateProfit(c, s, d, disc, q));
+    setLoading(false);
   };
 
   const generateMemo = () => {
@@ -90,14 +104,33 @@ const BusinessToolkit = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const resetTool = () => {
+    if (tab === "profit") {
+      setCost("");
+      setSell("");
+      setQty("");
+      setDelivery("");
+      setDiscount("");
+      setProfit(null);
+      setError("");
+      setLoading(false);
+      return;
+    }
+
+    setShopName("");
+    setItems([{ name: "", price: "", qty: "" }]);
+    setMemo("");
+    setCopied(false);
+  };
+
+  const canCalculate = Boolean(cost.trim() && sell.trim() && qty.trim());
+
   return (
     <PageTransition>
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
                 <Package size={22} className="text-white" />
@@ -148,11 +181,20 @@ const BusinessToolkit = () => {
                 </div>
               </div>
 
-              <Button onClick={calcProfit} variant="hero" className="w-full" size="lg">
-                <TrendingUp size={16} /> প্রফিট বিশ্লেষণ
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleProfitCalculate} disabled={!canCalculate || loading} variant="hero" className="flex-1" size="lg">
+                  <TrendingUp size={16} /> {loading ? "হিসাব চলছে..." : "প্রফিট বিশ্লেষণ"}
+                </Button>
+                <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                  <RotateCcw size={16} /> রিসেট
+                </Button>
+              </div>
 
-              {profit && (
+              {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+              {!error && !canCalculate && <p className="text-sm font-bangla text-muted-foreground">ক্রয়মূল্য, বিক্রয়মূল্য ও পরিমাণ দিন।</p>}
+
+              {loading && <ToolResultSkeleton cards={1} />}
+              {profit && !loading && (
                 <div className="space-y-4 mt-4">
                   <div className="grid grid-cols-2 gap-3">
                     {[
@@ -226,9 +268,14 @@ const BusinessToolkit = () => {
                   <Input placeholder="সংখ্যা" type="number" value={item.qty} onChange={(e) => { const n = [...items]; n[i] = { ...n[i], qty: e.target.value }; setItems(n); }} className="col-span-2 font-bangla text-sm" />
                 </div>
               ))}
-              <Button variant="ghost" size="sm" onClick={() => setItems([...items, { name: "", price: "", qty: "" }])} className="text-accent text-xs">
+              <div className="flex gap-3">
+                <Button variant="ghost" size="sm" type="button" onClick={() => setItems([...items, { name: "", price: "", qty: "" }])} className="text-accent text-xs">
                 <Plus size={14} /> আরো যোগ করুন
-              </Button>
+                </Button>
+                <Button type="button" onClick={resetTool} variant="outline" size="sm">
+                  <RotateCcw size={14} /> রিসেট
+                </Button>
+              </div>
               <Button onClick={generateMemo} variant="hero" className="w-full" size="lg">
                 <Receipt size={16} /> মেমো তৈরি করুন
               </Button>

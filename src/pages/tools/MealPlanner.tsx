@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
-import { UtensilsCrossed, ArrowLeft, ChefHat, Shuffle, Users, ShoppingCart, Clock, Copy, Check, Lightbulb, Heart } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { ChefHat, Shuffle, Users, ShoppingCart, Clock, Copy, Check, Lightbulb, Heart, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import ToolBackButton from "@/components/tools/ToolBackButton";
+import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
 
 type MealType = "rice" | "snack" | "dinner" | "light";
 type CookMode = "cook" | "outside";
@@ -159,24 +163,72 @@ function generateMeals(
 const MealPlanner = () => {
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("1");
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [ingredientText, setIngredientText] = useState("");
   const [cookTime, setCookTime] = useState("30");
   const [cookMode, setCookMode] = useState<CookMode>("cook");
   const [mealType, setMealType] = useState<MealType>("rice");
   const [results, setResults] = useState<MealSuggestion[] | null>(null);
   const [copied, setCopied] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const toggleIngredient = (item: string) => {
-    setSelectedIngredients((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
-    );
+  const addIngredient = (item: string) => {
+    const parsed = ingredientText
+      .split(/[,\n]/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    if (parsed.includes(item)) {
+      setIngredientText(parsed.filter((value) => value !== item).join(", "));
+      return;
+    }
+
+    setIngredientText([...parsed, item].join(", "));
   };
 
-  const generate = () => {
-    const b = parseFloat(budget) || 200;
-    const p = parseInt(people) || 1;
-    const t = parseInt(cookTime) || 30;
-    setResults(generateMeals(b, p, selectedIngredients, t, cookMode, mealType));
+  const parsedIngredients = ingredientText
+    .split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const canGenerate = Boolean(budget.trim() && ingredientText.trim() && Number(people) > 0);
+
+  const handleMealGenerate = async () => {
+    if (!budget.trim()) {
+      setError("বাজেট লিখুন।");
+      return;
+    }
+
+    if (!ingredientText.trim()) {
+      setError("উপকরণ লিখুন বা কুইক-সিলেক্ট থেকে যোগ করুন।");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+
+    const b = parseFloat(budget) || 0;
+    const p = parseInt(people, 10) || 1;
+    const t = parseInt(cookTime, 10) || 30;
+    const generated = generateMeals(b, p, parsedIngredients, t, cookMode, mealType);
+
+    setResults(generated);
+    setLoading(false);
+  };
+
+  const resetTool = () => {
+    setBudget("");
+    setPeople("1");
+    setIngredientText("");
+    setCookTime("30");
+    setCookMode("cook");
+    setMealType("rice");
+    setResults(null);
+    setCopied("");
+    setError("");
+    setLoading(false);
   };
 
   const copyResult = (text: string, id: string) => {
@@ -193,9 +245,7 @@ const MealPlanner = () => {
       <div className="min-h-screen pt-24 pb-16">
         <div className="container max-w-lg">
           <div className="mb-6">
-            <Link to="/tools" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors font-heading mb-4">
-              <ArrowLeft size={16} /> টুলস
-            </Link>
+            <ToolBackButton />
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
                 <ChefHat size={22} className="text-white" />
@@ -233,14 +283,31 @@ const MealPlanner = () => {
 
             {/* Ingredients */}
             <div className="space-y-2">
-              <label className="text-sm font-heading font-medium text-foreground">বাসায় কি কি আছে? (সিলেক্ট করুন)</label>
+              <label className="text-sm font-heading font-medium text-foreground">উপকরণ (কমা বা নতুন লাইনে লিখুন)</label>
+              <Textarea
+                placeholder="যেমন: চাল, ডিম, পেঁয়াজ, তেল"
+                value={ingredientText}
+                onChange={(e) => {
+                  setIngredientText(e.target.value);
+                  setError("");
+                }}
+                className="font-bangla min-h-[96px]"
+              />
               <div className="flex flex-wrap gap-2">
-                {allIngredients.map((item) => (
-                  <button key={item} onClick={() => toggleIngredient(item)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bangla font-medium transition-all ${selectedIngredients.includes(item) ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                    {item}
-                  </button>
-                ))}
+                {allIngredients.map((item) => {
+                  const active = parsedIngredients.includes(item);
+
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => addIngredient(item)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bangla font-medium transition-all ${active ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -262,38 +329,50 @@ const MealPlanner = () => {
             {/* Cook mode */}
             <div className="space-y-2">
               <label className="text-sm font-heading font-medium text-foreground">কিভাবে খেতে চান?</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setCookMode("cook")}
-                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${cookMode === "cook" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+              <RadioGroup value={cookMode} onValueChange={(value) => setCookMode(value as CookMode)} className="grid grid-cols-2 gap-2">
+                <Label htmlFor="cook-mode-home" className={`flex items-center gap-3 rounded-xl border px-3 py-3 cursor-pointer transition-all ${cookMode === "cook" ? "border-accent bg-accent/10 text-foreground" : "border-border bg-muted/40 text-muted-foreground"}`}>
+                  <RadioGroupItem value="cook" id="cook-mode-home" />
                   🍳 রান্না করব
-                </button>
-                <button onClick={() => setCookMode("outside")}
-                  className={`py-2.5 rounded-xl text-sm font-bangla font-medium transition-all ${cookMode === "outside" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                </Label>
+                <Label htmlFor="cook-mode-outside" className={`flex items-center gap-3 rounded-xl border px-3 py-3 cursor-pointer transition-all ${cookMode === "outside" ? "border-accent bg-accent/10 text-foreground" : "border-border bg-muted/40 text-muted-foreground"}`}>
+                  <RadioGroupItem value="outside" id="cook-mode-outside" />
                   🏪 বাইরে খাব
-                </button>
-              </div>
+                </Label>
+              </RadioGroup>
             </div>
 
             {/* Meal type */}
             <div className="space-y-2">
               <label className="text-sm font-heading font-medium text-foreground">খাবারের ধরন</label>
-              <div className="grid grid-cols-2 gap-2">
-                {(Object.keys(mealTypeLabels) as MealType[]).map((t) => (
-                  <button key={t} onClick={() => setMealType(t)}
-                    className={`py-2.5 rounded-xl text-xs font-bangla font-medium transition-all ${mealType === t ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                    {mealTypeLabels[t]}
-                  </button>
+              <select
+                value={mealType}
+                onChange={(e) => setMealType(e.target.value as MealType)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bangla ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {(Object.keys(mealTypeLabels) as MealType[]).map((type) => (
+                  <option key={type} value={type}>
+                    {mealTypeLabels[type]}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
 
-            <Button onClick={generate} variant="hero" className="w-full" size="lg">
-              <Shuffle size={16} /> মিল সাজেশন দিন
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleMealGenerate} disabled={!canGenerate || loading} variant="hero" className="flex-1" size="lg">
+                <Shuffle size={16} /> {loading ? "সাজেশন তৈরি হচ্ছে..." : "সাজেশন দেখুন"}
+              </Button>
+              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+                <RotateCcw size={16} /> রিসেট
+              </Button>
+            </div>
+
+            {error && <p className="text-sm font-bangla text-destructive">{error}</p>}
+            {!error && !canGenerate && <p className="text-sm font-bangla text-muted-foreground">বাজেট, উপকরণ ও জনসংখ্যা দিন, তারপর সাজেশন তৈরি হবে।</p>}
           </div>
 
           {/* Results */}
-          {results && results.length > 0 && (
+          {loading && <ToolResultSkeleton cards={3} />}
+          {results && results.length > 0 && !loading && (
             <div className="mt-6 space-y-4">
               {results.map((meal, i) => (
                 <div key={i} className={`glass-card rounded-2xl p-5 space-y-3 ${i === 0 ? "gradient-border" : ""}`}>
@@ -359,7 +438,7 @@ const MealPlanner = () => {
                 </div>
               ))}
 
-              <Button onClick={generate} variant="ghost" className="w-full text-accent" size="sm">
+              <Button onClick={handleMealGenerate} variant="ghost" className="w-full text-accent" size="sm">
                 <Shuffle size={14} /> অন্য সাজেশন দেখুন
               </Button>
             </div>

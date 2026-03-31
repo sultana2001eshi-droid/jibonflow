@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
   PenTool, Target, Clock, ArrowRight 
@@ -12,10 +12,13 @@ const tools = [
   { icon: Brain, title: "লাইফ অর্গানাইজার PRO", desc: "দৈনিক রুটিন, ফোকাস প্ল্যানার ও হ্যাবিট সাজেশন।", path: "/tools/organizer", gradient: "from-cyan-400 to-blue-500" },
   { icon: PenTool, title: "ক্যাপশন ও বায়ো ল্যাব", desc: "ফেসবুক ক্যাপশন, স্টাইলিশ বায়ো — ইমোশনাল ও বিজনেস টোন।", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "অপশন দিন, সেরা সিদ্ধান্ত পান — র‍্যান্ডম ও লজিক মিক্স।", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
-  { icon: Clock, title: "টাইম ও এজ সিস্টেম", desc: "সঠিক বয়স, সময়ের পার্থক্য ও কাউন্টডাউন।", path: "/tools/age", gradient: "from-violet-400 to-purple-500" },
+  { icon: Clock, title: "টাইম ও এজ সিস্টেম", desc: "সঠিক বয়স, সময়ের পার্থক্য ও কাউন্টডাউন।", path: "/tools/time", gradient: "from-violet-400 to-purple-500" },
 ];
 
-const ToolsPage = () => (
+const ToolsPage = () => {
+  const navigate = useNavigate();
+
+  return (
   <div className="min-h-screen pt-24 pb-16">
     <div className="container">
       <div className="text-center mb-14 space-y-4">
@@ -30,9 +33,10 @@ const ToolsPage = () => (
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
         {tools.map((tool, i) => (
-          <Link
+          <button
+            type="button"
+            onClick={() => navigate(tool.path)}
             key={tool.path}
-            to={tool.path}
             className="glass-card-hover gradient-border rounded-2xl p-6 group animate-fade-in"
             style={{ animationDelay: `${i * 0.05}s` }}
           >
@@ -48,11 +52,12 @@ const ToolsPage = () => (
                 <p className="text-sm text-muted-foreground font-bangla leading-relaxed">{tool.desc}</p>
               </div>
             </div>
-          </Link>
+          </button>
         ))}
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default ToolsPage;

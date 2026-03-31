@@ -102,6 +102,14 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
 }
 
 @layer components {
@@ -153,7 +161,12 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.4s ease;
+  }
+  .gradient-border > * {
+    position: relative;
+    z-index: 1;
   }
   .gradient-border:hover::before {
     opacity: 1;
