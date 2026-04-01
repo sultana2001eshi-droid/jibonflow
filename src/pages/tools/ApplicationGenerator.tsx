@@ -6,6 +6,7 @@ import { FileText, Copy, Check, Download, Eye, RotateCcw } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type AppType = "leave" | "job" | "formal" | "complaint";
 
