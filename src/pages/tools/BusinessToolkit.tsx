@@ -5,6 +5,7 @@ import { Package, Copy, Check, TrendingUp, Receipt, Plus, Lightbulb, AlertTriang
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type ProfitResult = {
   perUnit: number; totalProfit: number; margin: number;
