@@ -5,6 +5,7 @@ import { Target, Sparkles, Plus, X, Zap, Copy, Check, RotateCcw } from "lucide-r
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type Priority = "price" | "quality" | "time" | "longterm";
 const priorityLabels: Record<Priority, string> = {
