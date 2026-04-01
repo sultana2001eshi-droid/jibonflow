@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_media_history: {
+        Row: {
+          created_at: string
+          id: string
+          input_image: string | null
+          output_image: string | null
+          settings: Json | null
+          tool_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_image?: string | null
+          output_image?: string | null
+          settings?: Json | null
+          tool_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_image?: string | null
+          output_image?: string | null
+          settings?: Json | null
+          tool_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      saved_documents: {
+        Row: {
+          content: string | null
+          created_at: string
+          doc_type: string
+          download_url: string | null
+          id: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          doc_type: string
+          download_url?: string | null
+          id?: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          doc_type?: string
+          download_url?: string | null
+          id?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      shop_profiles: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          owner_name: string | null
+          phone: string | null
+          shop_name: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          shop_name: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          shop_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tool_history: {
+        Row: {
+          created_at: string
+          id: string
+          input_data: Json
+          is_favorite: boolean
+          output_data: Json
+          tool_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_data?: Json
+          is_favorite?: boolean
+          output_data?: Json
+          tool_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_data?: Json
+          is_favorite?: boolean
+          output_data?: Json
+          tool_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

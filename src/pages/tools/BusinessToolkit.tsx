@@ -5,6 +5,7 @@ import { Package, Copy, Check, TrendingUp, Receipt, Plus, Lightbulb, AlertTriang
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type ProfitResult = {
   perUnit: number; totalProfit: number; margin: number;
@@ -82,8 +83,10 @@ const BusinessToolkit = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setProfit(calculateProfit(c, s, d, disc, q));
+    const r = calculateProfit(c, s, d, disc, q);
+    setProfit(r);
     setLoading(false);
+    saveToolHistory("business", { cost: c, sell: s, delivery: d, discount: disc, qty: q }, r as any);
   };
 
   const generateMemo = () => {

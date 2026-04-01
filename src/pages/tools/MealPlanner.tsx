@@ -8,6 +8,7 @@ import { ChefHat, Shuffle, Users, ShoppingCart, Clock, Copy, Check, Lightbulb, H
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type MealType = "rice" | "snack" | "dinner" | "light";
 type CookMode = "cook" | "outside";
@@ -216,6 +217,7 @@ const MealPlanner = () => {
 
     setResults(generated);
     setLoading(false);
+    saveToolHistory("meal", { budget: b, people: p, ingredients: parsedIngredients, cookMode, mealType }, { meals: generated });
   };
 
   const resetTool = () => {

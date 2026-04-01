@@ -5,6 +5,7 @@ import { Wallet, TrendingUp, Lightbulb, AlertTriangle, PieChart, Plus, X, Copy, 
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type Category = { name: string; amount: string; icon: string };
 
@@ -146,8 +147,10 @@ const BudgetPlanner = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setResult(analyzeBudget(inc, categories, savingsGoal));
+    const r = analyzeBudget(inc, categories, savingsGoal);
+    setResult(r);
     setLoading(false);
+    saveToolHistory("budget", { income: inc, categories, savingsGoal }, r as any);
   };
 
   const resetTool = () => {

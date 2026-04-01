@@ -5,6 +5,7 @@ import { PenTool, Copy, Check, Sparkles, Hash, RefreshCw, RotateCcw } from "luci
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type Niche = "food" | "fashion" | "gadget" | "service";
 type Tone = "emotional" | "professional" | "funny" | "urgent";
@@ -173,8 +174,10 @@ const CaptionGenerator = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setResult(generateCaptions(product, niche, tone, audience, hasOffer, platform));
+    const r = generateCaptions(product, niche, tone, audience, hasOffer, platform);
+    setResult(r);
     setLoading(false);
+    saveToolHistory("caption", { product, niche, tone, audience, hasOffer, platform }, r as any);
   };
 
   const genBio = () => {

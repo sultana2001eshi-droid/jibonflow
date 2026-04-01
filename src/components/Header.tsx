@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 const navItems = [
   { label: "হোম", path: "/" },
   { label: "টুলস", path: "/tools" },
+  { label: "হিস্ট্রি", path: "/history" },
   { label: "আমার সম্পর্কে", path: "/about" },
   { label: "সেটিংস", path: "/settings" },
 ];
