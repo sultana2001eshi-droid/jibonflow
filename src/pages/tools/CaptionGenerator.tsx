@@ -5,6 +5,7 @@ import { PenTool, Copy, Check, Sparkles, Hash, RefreshCw, RotateCcw } from "luci
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 type Niche = "food" | "fashion" | "gadget" | "service";
 type Tone = "emotional" | "professional" | "funny" | "urgent";
