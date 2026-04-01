@@ -31,7 +31,7 @@ const ToolsPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
         {tools.map((tool, i) => (
           <button
             type="button"

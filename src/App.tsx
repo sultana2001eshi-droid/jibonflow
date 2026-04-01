@@ -20,6 +20,7 @@ import LifeOrganizer from "./pages/tools/LifeOrganizer";
 import CaptionGenerator from "./pages/tools/CaptionGenerator";
 import DecisionHelper from "./pages/tools/DecisionHelper";
 import AgeCalculator from "./pages/tools/AgeCalculator";
+import HistoryPage from "./pages/History";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/tools/decision" element={<DecisionHelper />} />
           <Route path="/tools/time" element={<AgeCalculator />} />
           <Route path="/tools/age" element={<AgeCalculator />} />
+          <Route path="/history" element={<HistoryPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/developer" element={<Developer />} />
