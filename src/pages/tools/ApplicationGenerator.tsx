@@ -113,8 +113,10 @@ const ApplicationGenerator = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setOutput(generateFormal(data, type));
+    const r = generateFormal(data, type);
+    setOutput(r);
     setLoading(false);
+    saveToolHistory("application", { type, ...data }, r as any);
   };
 
   const copy = () => {

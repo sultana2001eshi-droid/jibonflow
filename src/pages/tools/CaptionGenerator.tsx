@@ -174,8 +174,10 @@ const CaptionGenerator = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setResult(generateCaptions(product, niche, tone, audience, hasOffer, platform));
+    const r = generateCaptions(product, niche, tone, audience, hasOffer, platform);
+    setResult(r);
     setLoading(false);
+    saveToolHistory("caption", { product, niche, tone, audience, hasOffer, platform }, r as any);
   };
 
   const genBio = () => {

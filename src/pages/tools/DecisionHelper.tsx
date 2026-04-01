@@ -80,6 +80,7 @@ const DecisionHelper = () => {
 
     setResult({ best, runnerUp, reasoning: reasonMap[priority], allScored: scored });
     setLoading(false);
+    saveToolHistory("decision", { options: valid, priority }, { best: best.name, score: best.score, reasoning: reasonMap[priority] });
   };
 
   const copyResult = () => {

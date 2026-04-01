@@ -217,6 +217,7 @@ const MealPlanner = () => {
 
     setResults(generated);
     setLoading(false);
+    saveToolHistory("meal", { budget: b, people: p, ingredients: parsedIngredients, cookMode, mealType }, { meals: generated });
   };
 
   const resetTool = () => {

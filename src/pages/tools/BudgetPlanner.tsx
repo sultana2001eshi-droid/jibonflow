@@ -147,8 +147,10 @@ const BudgetPlanner = () => {
     setLoading(true);
 
     await new Promise((resolve) => window.setTimeout(resolve, 800));
-    setResult(analyzeBudget(inc, categories, savingsGoal));
+    const r = analyzeBudget(inc, categories, savingsGoal);
+    setResult(r);
     setLoading(false);
+    saveToolHistory("budget", { income: inc, categories, savingsGoal }, r as any);
   };
 
   const resetTool = () => {

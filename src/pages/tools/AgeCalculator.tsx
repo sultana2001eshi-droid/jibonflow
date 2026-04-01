@@ -95,7 +95,7 @@ const AgeCalculator = () => {
       eventCountdown = Math.ceil((evDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     }
 
-    setResult({
+    const ageResult = {
       years, months, days, totalDays, totalHours, totalWeeks, totalMinutes,
       nextBirthday,
       dayOfWeek: dayNames[birth.getDay()],
@@ -103,8 +103,10 @@ const AgeCalculator = () => {
       zodiac: getZodiac(birth.getMonth(), birth.getDate()),
       generation: getGeneration(birth.getFullYear()),
       eventCountdown, eventName: eventName || "ইভেন্ট",
-    });
+    };
+    setResult(ageResult);
     setLoading(false);
+    saveToolHistory("age", { birthdate, targetDate, eventName, eventDate }, ageResult as any);
   };
 
   const resetTool = () => {
