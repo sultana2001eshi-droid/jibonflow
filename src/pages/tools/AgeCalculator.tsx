@@ -6,6 +6,7 @@ import { Clock, CalendarDays, Timer, Copy, Check, Sparkles, RotateCcw } from "lu
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import { saveToolHistory } from "@/lib/toolHistory";
 
 const AgeCalculator = () => {
   useNavigate();
