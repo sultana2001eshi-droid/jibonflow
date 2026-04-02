@@ -4,14 +4,15 @@ import { motion } from "framer-motion";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
   PenTool, Target, Clock, ArrowRight, Sparkles,
-  TrendingUp, ChefHat
+  TrendingUp, ChefHat, Receipt
 } from "lucide-react";
 
 const tools = [
   { icon: Wallet, title: "স্মার্ট বাজেট AI", desc: "আয়-ব্যয়ের হিসাব ও সেভিংস পরামর্শ", path: "/tools/budget", gradient: "from-emerald-400 to-teal-500" },
   { icon: UtensilsCrossed, title: "মিল ইন্টেলিজেন্স", desc: "বাজেট অনুযায়ী খাবার পরিকল্পনা", path: "/tools/meal", gradient: "from-orange-400 to-red-500" },
-  { icon: FileText, title: "দরখাস্ত বিল্ডার", desc: "স্মার্ট বাংলা আবেদন তৈরি", path: "/tools/application", gradient: "from-blue-400 to-indigo-500" },
-  { icon: Package, title: "ব্যবসা পাওয়ার টুলস", desc: "প্রফিট, ক্যাশ মেমো, অর্ডার সামারি", path: "/tools/business", gradient: "from-purple-400 to-pink-500" },
+  { icon: FileText, title: "দরখাস্ত বিল্ডার", desc: "A4 প্রিন্ট-রেডি দরখাস্ত — PDF এক্সপোর্ট", path: "/tools/application", gradient: "from-blue-400 to-indigo-500" },
+  { icon: Receipt, title: "ক্যাশ মেমো / ইনভয়েস", desc: "ব্যবসায়িক মানের ইনভয়েস তৈরি ও PDF", path: "/tools/cashmemo", gradient: "from-purple-400 to-pink-500" },
+  { icon: Package, title: "বিজনেস প্রফিট এনালাইসিস", desc: "প্রফিট, মার্জিন ও ব্রেক-ইভেন বিশ্লেষণ", path: "/tools/business", gradient: "from-fuchsia-400 to-purple-500" },
   { icon: Brain, title: "লাইফ অর্গানাইজার PRO", desc: "রুটিন ও ফোকাস প্ল্যানার", path: "/tools/organizer", gradient: "from-cyan-400 to-blue-500" },
   { icon: PenTool, title: "ক্যাপশন ল্যাব", desc: "স্মার্ট ক্যাপশন ও বায়ো", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "সেরা সিদ্ধান্ত নেয়ার সহায়তা", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
