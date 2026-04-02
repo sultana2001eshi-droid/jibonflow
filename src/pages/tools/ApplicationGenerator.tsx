@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Copy, Check, Download, Eye, RotateCcw } from "lucide-react";
+import { FileText, Copy, Check, Download, Eye, RotateCcw, Printer, Save, Image } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import ToolBackButton from "@/components/tools/ToolBackButton";
 import ToolResultSkeleton from "@/components/tools/ToolResultSkeleton";
+import ApplicationPreview from "@/components/tools/ApplicationPreview";
 import { saveToolHistory } from "@/lib/toolHistory";
+import { saveDocument } from "@/lib/documentService";
+import { exportAsPDF, exportAsJPG, printElement } from "@/lib/exportUtils";
+import { toast } from "sonner";
 
 type AppType = "leave" | "job" | "formal" | "complaint";
 
@@ -38,7 +42,7 @@ const generateFormal = (d: Record<string, string>, type: AppType): { full: strin
   return templates[type];
 };
 
-const fields: Record<AppType, { key: string; label: string; placeholder: string; multiline?: boolean }[]> = {
+const fieldDefs: Record<AppType, { key: string; label: string; placeholder: string; multiline?: boolean }[]> = {
   leave: [
     { key: "name", label: "আপনার নাম", placeholder: "মোহাম্মদ নাসরুল্লাহ" },
     { key: "to", label: "বরাবর", placeholder: "প্রধান শিক্ষক" },
@@ -86,6 +90,7 @@ const typeLabels: Record<AppType, string> = {
 };
 
 const ApplicationGenerator = () => {
+  const previewRef = useRef<HTMLDivElement>(null);
   const [type, setType] = useState<AppType>("leave");
   const [data, setData] = useState<Record<string, string>>({});
   const [output, setOutput] = useState<{ full: string; short: string } | null>(null);
@@ -101,18 +106,15 @@ const ApplicationGenerator = () => {
     complaint: ["name", "to", "institution", "subject", "body"],
   };
 
-  const handleApplicationGenerate = async () => {
+  const handleGenerate = async () => {
     const missingField = requiredFields[type].find((key) => !(data[key] || "").trim());
-
     if (missingField) {
       setError("দরখাস্ত তৈরি করতে প্রয়োজনীয় তথ্য পূরণ করুন।");
       return;
     }
-
     setError("");
     setLoading(true);
-
-    await new Promise((resolve) => window.setTimeout(resolve, 800));
+    await new Promise((resolve) => window.setTimeout(resolve, 600));
     const r = generateFormal(data, type);
     setOutput(r);
     setLoading(false);
@@ -126,15 +128,31 @@ const ApplicationGenerator = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const downloadTxt = () => {
+  const handlePDF = () => {
+    if (!previewRef.current) return;
+    exportAsPDF(previewRef.current, `দরখাস্ত-${typeLabels[type].split(" ").pop()}`);
+    toast.success("PDF ডাউনলোড হচ্ছে...");
+  };
+
+  const handleJPG = () => {
+    if (!previewRef.current) return;
+    exportAsJPG(previewRef.current, `দরখাস্ত-${typeLabels[type].split(" ").pop()}`);
+    toast.success("JPG ডাউনলোড হচ্ছে...");
+  };
+
+  const handlePrint = () => {
+    if (!previewRef.current) return;
+    printElement(previewRef.current);
+  };
+
+  const handleSaveDoc = async () => {
     if (!output) return;
-    const blob = new Blob([output.full], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${typeLabels[type].split(" ").pop()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await saveDocument({
+      doc_type: "application",
+      title: `${typeLabels[type]} — ${data.name || ""}`,
+      content: JSON.stringify({ type, data, output }),
+    });
+    toast.success("দরখাস্ত সেভ হয়েছে!");
   };
 
   const resetTool = () => {
@@ -149,7 +167,7 @@ const ApplicationGenerator = () => {
   return (
     <PageTransition>
       <div className="min-h-screen pt-24 pb-16">
-        <div className="container max-w-lg">
+        <div className="container max-w-2xl">
           <div className="mb-6">
             <ToolBackButton />
             <div className="flex items-center gap-3">
@@ -158,7 +176,7 @@ const ApplicationGenerator = () => {
               </div>
               <div>
                 <h1 className="font-heading text-xl font-bold text-foreground">স্মার্ট দরখাস্ত বিল্ডার</h1>
-                <p className="text-xs text-muted-foreground font-bangla">ফুল ও শর্ট ভার্সন সহ সুন্দর দরখাস্ত</p>
+                <p className="text-xs text-muted-foreground font-bangla">A4 প্রিন্ট-রেডি দরখাস্ত — PDF ও JPG এক্সপোর্ট</p>
               </div>
             </div>
           </div>
@@ -174,16 +192,11 @@ const ApplicationGenerator = () => {
               ))}
             </div>
 
-            {fields[type].map((f) => (
+            {fieldDefs[type].map((f) => (
               <div key={f.key} className="space-y-1.5">
                 <label className="text-sm font-heading font-medium text-foreground">{f.label}</label>
                 {f.multiline ? (
-                  <Textarea
-                    placeholder={f.placeholder}
-                    value={data[f.key] || ""}
-                    onChange={(e) => setData({ ...data, [f.key]: e.target.value })}
-                    className="font-bangla min-h-[96px]"
-                  />
+                  <Textarea placeholder={f.placeholder} value={data[f.key] || ""} onChange={(e) => setData({ ...data, [f.key]: e.target.value })} className="font-bangla min-h-[96px]" />
                 ) : (
                   <Input placeholder={f.placeholder} value={data[f.key] || ""} onChange={(e) => setData({ ...data, [f.key]: e.target.value })} className="font-bangla" />
                 )}
@@ -191,10 +204,10 @@ const ApplicationGenerator = () => {
             ))}
 
             <div className="flex gap-3">
-              <Button onClick={handleApplicationGenerate} disabled={loading} variant="hero" className="flex-1" size="lg">
-                <Eye size={16} /> {loading ? "দরখাস্ত তৈরি হচ্ছে..." : "তৈরি করুন"}
+              <Button onClick={handleGenerate} disabled={loading} variant="hero" className="flex-1" size="lg">
+                <Eye size={16} /> {loading ? "তৈরি হচ্ছে..." : "তৈরি করুন"}
               </Button>
-              <Button type="button" onClick={resetTool} variant="outline" size="lg">
+              <Button onClick={resetTool} variant="outline" size="lg">
                 <RotateCcw size={16} /> রিসেট
               </Button>
             </div>
@@ -203,37 +216,60 @@ const ApplicationGenerator = () => {
           </div>
 
           {loading && <ToolResultSkeleton cards={1} />}
+
           {output && !loading && (
-            <div className="mt-6 glass-card gradient-border rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-heading font-semibold text-foreground">আপনার দরখাস্ত</h3>
-                <div className="flex gap-1">
+            <div className="mt-6 space-y-4">
+              {/* Text view */}
+              <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-heading font-semibold text-foreground">আপনার দরখাস্ত</h3>
                   <Button variant="ghost" size="sm" onClick={copy} className="text-xs">
                     {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     {copied ? "কপি হয়েছে" : "কপি"}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={downloadTxt} className="text-xs">
-                    <Download size={14} /> ডাউনলোড
-                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setViewMode("full")}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bangla font-medium transition-all ${viewMode === "full" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                    📄 সম্পূর্ণ ভার্সন
+                  </button>
+                  <button onClick={() => setViewMode("short")}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bangla font-medium transition-all ${viewMode === "short" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
+                    ⚡ সংক্ষিপ্ত ভার্সন
+                  </button>
+                </div>
+                <div className="bg-card rounded-xl p-6 border border-border/30 shadow-inner">
+                  <pre className="text-sm text-foreground font-bangla whitespace-pre-wrap leading-[1.8]">
+                    {viewMode === "full" ? output.full : output.short}
+                  </pre>
                 </div>
               </div>
 
-              {/* View mode toggle */}
-              <div className="flex gap-2">
-                <button onClick={() => setViewMode("full")}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bangla font-medium transition-all ${viewMode === "full" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
-                  📄 সম্পূর্ণ ভার্সন
-                </button>
-                <button onClick={() => setViewMode("short")}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bangla font-medium transition-all ${viewMode === "short" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>
-                  ⚡ সংক্ষিপ্ত ভার্সন
-                </button>
+              {/* A4 Preview */}
+              <div className="glass-card gradient-border rounded-2xl p-6 space-y-4">
+                <h3 className="font-heading font-semibold text-foreground">A4 প্রিন্ট প্রিভিউ</h3>
+                <div className="border border-border/30 rounded-xl overflow-hidden shadow-lg bg-white">
+                  <ApplicationPreview
+                    ref={previewRef}
+                    data={{ text: output.full, type, typeLabel: typeLabels[type] }}
+                  />
+                </div>
               </div>
 
-              <div className="bg-card rounded-xl p-6 border border-border/30 shadow-inner">
-                <pre className="text-sm text-foreground font-bangla whitespace-pre-wrap leading-[1.8]">
-                  {viewMode === "full" ? output.full : output.short}
-                </pre>
+              {/* Export buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <Button onClick={handlePDF} variant="outline" size="sm" className="text-xs">
+                  <Download size={14} /> PDF
+                </Button>
+                <Button onClick={handleJPG} variant="outline" size="sm" className="text-xs">
+                  <Image size={14} /> JPG
+                </Button>
+                <Button onClick={handlePrint} variant="outline" size="sm" className="text-xs">
+                  <Printer size={14} /> প্রিন্ট
+                </Button>
+                <Button onClick={handleSaveDoc} variant="outline" size="sm" className="text-xs">
+                  <Save size={14} /> সেভ করুন
+                </Button>
               </div>
             </div>
           )}

@@ -16,11 +16,13 @@ import BudgetPlanner from "./pages/tools/BudgetPlanner";
 import MealPlanner from "./pages/tools/MealPlanner";
 import ApplicationGenerator from "./pages/tools/ApplicationGenerator";
 import BusinessToolkit from "./pages/tools/BusinessToolkit";
+import CashMemoTool from "./pages/tools/CashMemoTool";
 import LifeOrganizer from "./pages/tools/LifeOrganizer";
 import CaptionGenerator from "./pages/tools/CaptionGenerator";
 import DecisionHelper from "./pages/tools/DecisionHelper";
 import AgeCalculator from "./pages/tools/AgeCalculator";
 import HistoryPage from "./pages/History";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -38,12 +40,14 @@ const App = () => (
           <Route path="/tools/meal" element={<MealPlanner />} />
           <Route path="/tools/application" element={<ApplicationGenerator />} />
           <Route path="/tools/business" element={<BusinessToolkit />} />
+          <Route path="/tools/cashmemo" element={<CashMemoTool />} />
           <Route path="/tools/organizer" element={<LifeOrganizer />} />
           <Route path="/tools/caption" element={<CaptionGenerator />} />
           <Route path="/tools/decision" element={<DecisionHelper />} />
           <Route path="/tools/time" element={<AgeCalculator />} />
           <Route path="/tools/age" element={<AgeCalculator />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/documents" element={<Documents />} />
           <Route path="/about" element={<About />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/developer" element={<Developer />} />

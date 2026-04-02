@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
-  PenTool, Target, Clock, ArrowRight 
+  PenTool, Target, Clock, ArrowRight, Receipt 
 } from "lucide-react";
 
 const tools = [
   { icon: Wallet, title: "স্মার্ট বাজেট AI", desc: "মাসিক আয়-ব্যয়ের হিসাব করুন, সেভিংস পরামর্শ পান এবং লাইফস্টাইল টিপস দেখুন।", path: "/tools/budget", gradient: "from-emerald-400 to-teal-500" },
   { icon: UtensilsCrossed, title: "মিল ইন্টেলিজেন্স সিস্টেম", desc: "বাজেট অনুযায়ী খাবার পরিকল্পনা, র‍্যান্ডম মিল জেনারেটর ও পরিবার/ছাত্র মোড।", path: "/tools/meal", gradient: "from-orange-400 to-red-500" },
-  { icon: FileText, title: "স্মার্ট অ্যাপ্লিকেশন বিল্ডার", desc: "ছুটির আবেদন, চাকরির আবেদন ও ফর্মাল দরখাস্ত সুন্দরভাবে তৈরি করুন।", path: "/tools/application", gradient: "from-blue-400 to-indigo-500" },
-  { icon: Package, title: "বিজনেস পাওয়ার টুলস", desc: "প্রফিট ক্যালকুলেটর, ক্যাশ মেমো, অর্ডার সামারি ও ডেলিভারি চার্জ।", path: "/tools/business", gradient: "from-purple-400 to-pink-500" },
+  { icon: FileText, title: "স্মার্ট দরখাস্ত বিল্ডার", desc: "A4 প্রিন্ট-রেডি দরখাস্ত — PDF, JPG এক্সপোর্ট ও প্রিন্ট।", path: "/tools/application", gradient: "from-blue-400 to-indigo-500" },
+  { icon: Receipt, title: "ক্যাশ মেমো / ইনভয়েস", desc: "ব্যবসায়িক মানের ইনভয়েস — দোকানের তথ্য সেভ, PDF ও JPG এক্সপোর্ট।", path: "/tools/cashmemo", gradient: "from-purple-400 to-pink-500" },
+  { icon: Package, title: "বিজনেস প্রফিট এনালাইসিস", desc: "প্রফিট ক্যালকুলেটর, মার্জিন ও ব্রেক-ইভেন বিশ্লেষণ।", path: "/tools/business", gradient: "from-fuchsia-400 to-purple-500" },
   { icon: Brain, title: "লাইফ অর্গানাইজার PRO", desc: "দৈনিক রুটিন, ফোকাস প্ল্যানার ও হ্যাবিট সাজেশন।", path: "/tools/organizer", gradient: "from-cyan-400 to-blue-500" },
   { icon: PenTool, title: "ক্যাপশন ও বায়ো ল্যাব", desc: "ফেসবুক ক্যাপশন, স্টাইলিশ বায়ো — ইমোশনাল ও বিজনেস টোন।", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "অপশন দিন, সেরা সিদ্ধান্ত পান — র‍্যান্ডম ও লজিক মিক্স।", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
