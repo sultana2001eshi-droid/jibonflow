@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
-  PenTool, Target, Clock, ArrowRight, Receipt 
+  PenTool, Target, Clock, ArrowRight, Receipt, Camera, Scissors 
 } from "lucide-react";
 
 const tools = [
