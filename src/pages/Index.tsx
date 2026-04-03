@@ -207,7 +207,7 @@ const Index = () => {
         <div className="container">
           <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
             {[
-              { num: "৮+", label: "স্মার্ট টুলস" },
+              { num: "১১+", label: "স্মার্ট টুলস" },
               { num: "১০০%", label: "ফ্রি" },
               { num: "০", label: "একাউন্ট দরকার" },
             ].map((s) => (
