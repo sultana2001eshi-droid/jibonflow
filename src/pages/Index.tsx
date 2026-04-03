@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
   PenTool, Target, Clock, ArrowRight, Sparkles,
-  TrendingUp, ChefHat, Receipt
+  TrendingUp, ChefHat, Receipt, Camera, Scissors
 } from "lucide-react";
 
 const tools = [
