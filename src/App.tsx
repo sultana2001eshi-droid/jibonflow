@@ -48,6 +48,8 @@ const App = () => (
           <Route path="/tools/decision" element={<DecisionHelper />} />
           <Route path="/tools/time" element={<AgeCalculator />} />
           <Route path="/tools/age" element={<AgeCalculator />} />
+          <Route path="/tools/passport-photo" element={<PassportPhoto />} />
+          <Route path="/tools/hair-style" element={<HairStyle />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/about" element={<About />} />

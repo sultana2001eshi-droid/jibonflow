@@ -14,6 +14,8 @@ const tools = [
   { icon: PenTool, title: "ক্যাপশন ও বায়ো ল্যাব", desc: "ফেসবুক ক্যাপশন, স্টাইলিশ বায়ো — ইমোশনাল ও বিজনেস টোন।", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "অপশন দিন, সেরা সিদ্ধান্ত পান — র‍্যান্ডম ও লজিক মিক্স।", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
   { icon: Clock, title: "টাইম ও এজ সিস্টেম", desc: "সঠিক বয়স, সময়ের পার্থক্য ও কাউন্টডাউন।", path: "/tools/time", gradient: "from-violet-400 to-purple-500" },
+  { icon: Camera, title: "📸 AI পাসপোর্ট ফটো", desc: "প্রফেশনাল পাসপোর্ট ছবি — ব্যাকগ্রাউন্ড, ড্রেস, প্রিন্ট শীট।", path: "/tools/passport-photo", gradient: "from-sky-400 to-cyan-500" },
+  { icon: Scissors, title: "💇 হেয়ারস্টাইল প্রিভিউ", desc: "AI দিয়ে নতুন হেয়ারস্টাইল দেখুন — ফেড, কোরিয়ান, ফরমাল।", path: "/tools/hair-style", gradient: "from-rose-400 to-pink-500" },
 ];
 
 const ToolsPage = () => {
