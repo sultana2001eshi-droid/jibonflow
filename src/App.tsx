@@ -21,6 +21,8 @@ import LifeOrganizer from "./pages/tools/LifeOrganizer";
 import CaptionGenerator from "./pages/tools/CaptionGenerator";
 import DecisionHelper from "./pages/tools/DecisionHelper";
 import AgeCalculator from "./pages/tools/AgeCalculator";
+import PassportPhoto from "./pages/tools/PassportPhoto";
+import HairStyle from "./pages/tools/HairStyle";
 import HistoryPage from "./pages/History";
 import Documents from "./pages/Documents";
 
