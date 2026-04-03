@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   Wallet, UtensilsCrossed, FileText, Package, Brain, 
   PenTool, Target, Clock, ArrowRight, Sparkles,
-  TrendingUp, ChefHat, Receipt
+  TrendingUp, ChefHat, Receipt, Camera, Scissors
 } from "lucide-react";
 
 const tools = [
@@ -17,6 +17,8 @@ const tools = [
   { icon: PenTool, title: "ক্যাপশন ল্যাব", desc: "স্মার্ট ক্যাপশন ও বায়ো", path: "/tools/caption", gradient: "from-pink-400 to-rose-500" },
   { icon: Target, title: "ডিসিশন ইঞ্জিন", desc: "সেরা সিদ্ধান্ত নেয়ার সহায়তা", path: "/tools/decision", gradient: "from-amber-400 to-yellow-500" },
   { icon: Clock, title: "টাইম সিস্টেম", desc: "সঠিক বয়স ও সময়ের হিসাব", path: "/tools/time", gradient: "from-violet-400 to-purple-500" },
+  { icon: Camera, title: "AI পাসপোর্ট ফটো", desc: "প্রফেশনাল পাসপোর্ট ছবি তৈরি", path: "/tools/passport-photo", gradient: "from-sky-400 to-cyan-500" },
+  { icon: Scissors, title: "হেয়ারস্টাইল প্রিভিউ", desc: "AI দিয়ে নতুন লুক দেখুন", path: "/tools/hair-style", gradient: "from-rose-400 to-pink-500" },
 ];
 
 const Particles = () => (
@@ -205,7 +207,7 @@ const Index = () => {
         <div className="container">
           <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto text-center">
             {[
-              { num: "৮+", label: "স্মার্ট টুলস" },
+              { num: "১১+", label: "স্মার্ট টুলস" },
               { num: "১০০%", label: "ফ্রি" },
               { num: "০", label: "একাউন্ট দরকার" },
             ].map((s) => (

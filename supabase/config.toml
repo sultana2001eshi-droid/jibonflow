@@ -1,1 +1,4 @@
 project_id = "amdqwgfdzzsdwrkcgcvi"
+
+[functions.ai-image-process]
+verify_jwt = false
