@@ -16,6 +16,7 @@ interface Doc {
 const docTypeLabel: Record<string, { label: string; icon: typeof Receipt; gradient: string }> = {
   cash_memo: { label: "ক্যাশ মেমো", icon: Receipt, gradient: "from-purple-400 to-pink-500" },
   application: { label: "দরখাস্ত", icon: FileText, gradient: "from-blue-400 to-indigo-500" },
+  passport_photo: { label: "পাসপোর্ট ফটো", icon: FileText, gradient: "from-sky-400 to-cyan-500" },
 };
 
 const Documents = () => {
