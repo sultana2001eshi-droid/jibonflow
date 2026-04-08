@@ -196,12 +196,31 @@ const PassportPhoto = () => {
               onClick={() => fileInputRef.current?.click()}
               className="glass-card rounded-2xl p-10 text-center cursor-pointer border-2 border-dashed border-accent/30 hover:border-accent/60 transition-all group"
             >
-              <input ref={fileInputRef} type="file" accept="image/*" capture="user" className="hidden"
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
               <Upload size={48} className="mx-auto text-accent/40 group-hover:text-accent/70 transition-colors mb-4" />
-              <p className="font-bangla text-foreground font-medium">ছবি আপলোড করুন</p>
-              <p className="text-xs text-muted-foreground font-bangla mt-1">ড্র্যাগ এন্ড ড্রপ বা ক্লিক করুন</p>
-              <p className="text-xs text-muted-foreground font-bangla mt-1">📱 মোবাইলে ক্যামেরা বা গ্যালারি থেকে</p>
+              <p className="font-bangla text-foreground font-semibold text-lg">ছবি আপলোড করুন</p>
+              <p className="text-sm text-muted-foreground font-bangla mt-2">ড্র্যাগ এন্ড ড্রপ বা ক্লিক করুন</p>
+              <div className="flex flex-col sm:flex-row gap-3 mt-5 justify-center">
+                <Button type="button" variant="outline" size="lg" className="gap-2 font-bangla" onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
+                  📁 গ্যালারি থেকে আপলোড
+                </Button>
+                <Button type="button" variant="outline" size="lg" className="gap-2 font-bangla" onClick={(e) => {
+                  e.stopPropagation();
+                  const camInput = document.createElement("input");
+                  camInput.type = "file";
+                  camInput.accept = "image/*";
+                  camInput.capture = "user";
+                  camInput.onchange = (ev) => {
+                    const f = (ev.target as HTMLInputElement).files?.[0];
+                    if (f) handleFileSelect(f);
+                  };
+                  camInput.click();
+                }}>
+                  📷 ক্যামেরা দিয়ে ছবি তুলুন
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground font-bangla mt-3">JPG, PNG, WEBP সাপোর্টেড</p>
             </div>
           )}
 

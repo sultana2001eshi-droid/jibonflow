@@ -22,7 +22,7 @@ const topTools = [
 ];
 
 const Footer = () => (
-  <footer className="relative bg-primary text-primary-foreground overflow-hidden">
+  <footer className="relative bg-primary text-primary-foreground overflow-visible">
     {/* Top gradient divider */}
     <div className="h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
 
