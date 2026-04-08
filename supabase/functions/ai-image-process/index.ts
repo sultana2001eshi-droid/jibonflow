@@ -18,37 +18,47 @@ serve(async (req) => {
 
     if (mode === "passport_photo") {
       const { background, dressStyle, hairStyle, photoSize } = options || {};
-      prompt = `You are a professional passport photo editor. Edit this person's photo for a ${photoSize || "passport"} photo.
+      prompt = `You are an expert passport photo studio editor with years of professional experience.
 
-CRITICAL RULES:
-- DO NOT change the person's face, skin tone, facial features, or identity in ANY way
-- Keep the face EXACTLY as it is
-- Only modify background, clothing, and hair styling as specified
+ABSOLUTE RULES — NEVER BREAK:
+- The person's FACE must remain 100% IDENTICAL — do NOT alter face shape, skin tone, skin texture, eyes, nose, mouth, ears, jawline, or any facial feature
+- Do NOT reshape, smooth, or beautify the face in any way
+- Do NOT cut off ears, hair edges, or the top of the head
+- Preserve natural skin texture — no airbrushing
 
-Instructions:
-1. Remove the existing background completely
-2. Replace with a clean, solid ${background || "white"} background
-3. Crop to proper passport/ID photo framing (head centered, proper margins)
-${dressStyle && dressStyle !== "keep_original" ? `4. Add a professional ${dressStyle} outfit (formal wear), keeping the neck and face area natural` : "4. Keep the original clothing"}
-${hairStyle && hairStyle !== "keep_original" ? `5. Make the hair look ${hairStyle === "clean_hair" ? "neat and tidy" : "formally combed and professional"}` : "5. Keep the original hairstyle"}
-6. Ensure proper lighting - even, studio-quality lighting on the face
-7. The final image should look like a professional studio passport photo
-8. Output a single portrait photo with clean edges`;
+EDITING INSTRUCTIONS:
+1. BACKGROUND: Remove the existing background completely and replace with a clean, solid ${background || "white"} background. Ensure crisp, sharp edges around hair and ears — no halos or artifacts
+2. FRAMING: Crop to proper ${photoSize || "passport"} photo dimensions:
+   - Head centered horizontally
+   - Eyes at approximately 60% from bottom
+   - Proper headroom (about 10-15% above head)
+   - Shoulders visible and balanced
+   - No cropping of ears or hair
+3. LIGHTING: Apply even, studio-quality soft lighting. Remove harsh shadows. Ensure both sides of face are evenly lit
+${dressStyle && dressStyle !== "keep_original" ? `4. CLOTHING: Replace the current outfit with a professional ${dressStyle} attire. Blend naturally at the neckline. Keep the neck and face completely untouched` : "4. CLOTHING: Keep the original clothing as-is"}
+${hairStyle && hairStyle !== "keep_original" ? `5. HAIR: Make the hair look ${hairStyle === "clean_hair" ? "neat, tidy and well-groomed" : "formally combed, parted, and professionally styled"}. Do NOT change hair color or length. Keep every strand natural` : "5. HAIR: Keep the original hairstyle exactly as-is"}
+6. OUTPUT: A single clean, print-ready portrait photo that looks like it was taken in a professional passport photo studio`;
     } else if (mode === "hairstyle_preview") {
       const { style, gender, hairLength } = options || {};
-      prompt = `You are a professional hairstyle preview generator. Apply a ${style} hairstyle to this person's photo.
+      prompt = `You are a world-class virtual hairstylist creating realistic salon preview images.
 
-CRITICAL RULES:
-- DO NOT change the person's face, skin tone, facial features, or identity
-- Keep the face EXACTLY as it is
-- Only modify the hairstyle
+ABSOLUTE RULES — NEVER BREAK:
+- The person's FACE must remain 100% IDENTICAL — do NOT alter face shape, skin tone, eyes, nose, mouth, ears, jawline, or any facial feature
+- Preserve the exact same head angle, lighting direction, and photo perspective
+- Do NOT add weird artifacts on the forehead, ears, or temple area
+- The hairline transition must look completely natural
 
-Instructions:
-1. Apply a ${hairLength || "medium"} length ${style} hairstyle suitable for ${gender || "universal"} look
-2. Make the hairstyle look natural and realistic on this person
-3. Keep the original background
-4. Ensure the hairstyle blends naturally with the person's face shape and skin tone
-5. The result should look like a realistic preview of how they would look with this hairstyle`;
+HAIRSTYLE INSTRUCTIONS:
+1. Apply a realistic ${hairLength || "medium"} length "${style}" hairstyle
+2. Gender context: ${gender || "universal"} — choose appropriate variation
+3. Hair must blend naturally with the person's:
+   - Skin tone at the hairline and temples
+   - Face shape and head contour
+   - Natural hair texture direction
+4. Fade edges (if applicable) must look clean and realistic — like a real barber did it
+5. Keep the original background exactly as-is
+6. The final result should look like a real photograph — as if the person actually went to a salon and got this exact haircut
+7. Pay special attention to natural-looking edges around ears, forehead, and nape of neck`;
     } else {
       throw new Error("Invalid mode. Use 'passport_photo' or 'hairstyle_preview'");
     }
